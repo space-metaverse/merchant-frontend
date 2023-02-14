@@ -54,8 +54,11 @@ const Auth: React.FC = () => {
     if (!localImmerToken) {
       const urlSearchParams = new URLSearchParams(window.location.search)
       const loginCode = urlSearchParams.get('loginCode')
-      if (loginCode) setLoginCode(loginCode)
-      else window.location.href = `${getAuthURL()}/?redirect=${window.location.href}`
+      if (loginCode) {
+        setLoginCode(loginCode)
+      } else {
+        window.location.href = `${getAuthURL()}/?redirect=${window.location.href}`
+      }
     } else {
       setImmerToken(localImmerToken)
     }
@@ -64,7 +67,7 @@ const Auth: React.FC = () => {
   useEffect(() => {
     if (isGetVerifyCodeSuccess && getVerifyCodeData?.immerToken) {
       setCookie(null, 'immerToken', getVerifyCodeData?.immerToken, {
-        domain: 'tryspace.com',
+        domain: process.env.NEXT_PUBLIC_ENV === 'local' ? 'localhost' : 'tryspace.com',
       })
       window.location.search = ''
     }

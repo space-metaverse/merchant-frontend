@@ -119,7 +119,7 @@ interface PostPrimaryWalletRequest {
 const getBaseURl = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
-      return 'http://localhost:3003/account'
+      return 'https://api.dev.tryspace.com/account'
     case 'dev':
       return 'https://api.dev.tryspace.com/account'
     case 'qa':

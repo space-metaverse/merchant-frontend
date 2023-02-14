@@ -49,7 +49,7 @@ interface PostChangePasswordResponse {
 const getBaseURL = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
-      return 'http://localhost:3002/auth'
+      return 'https://api.dev.tryspace.com/auth'
     case 'dev':
       return 'https://api.dev.tryspace.com/auth'
     case 'qa':
