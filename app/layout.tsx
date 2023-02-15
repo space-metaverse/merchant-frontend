@@ -9,30 +9,7 @@ import TopNav from '../components/TopNav'
 import StyledComponentsRegistry from '../lib/registry'
 import styled from 'styled-components'
 import { useRouter } from 'next/navigation'
-
-export const Title = styled.h1`
-  ${({ theme }) => theme.fonts.size['3xl']};
-  display: flex;
-  align-items: center;
-  font-weight: ${({ theme }) => theme.fonts.weight.bold};
-  border-bottom: ${({ theme }) => `1px solid ${theme.colors.dark['200']}`};
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-
-  > div {
-    cursor: pointer;
-    margin-right: 1rem;
-
-    path {
-      stroke: ${({ theme }) => theme.colors.dark[500]};
-      transition: ${({ theme }) => theme.transitions.ease};
-    }
-
-    &:hover path {
-      stroke: ${({ theme }) => theme.colors.blue[400]};
-    }
-  }
-`
+import { StyledTitle } from '../components/Title'
 
 const Wrapper = styled.div`
   gap: 3rem;
@@ -50,7 +27,7 @@ const Wrapper = styled.div`
     margin-top: 5rem;
     flex-direction: column;
 
-    ${Title} {
+    ${StyledTitle} {
       display: none;
     }
   }

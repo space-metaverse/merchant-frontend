@@ -1,4 +1,5 @@
-import { Title } from "../layout";
+"use client"
+import Title from "../../components/Title"
 
 export default function Orders() {
   return (
