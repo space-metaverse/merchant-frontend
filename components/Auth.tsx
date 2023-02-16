@@ -9,7 +9,7 @@ import { useGetVerifyCodeQuery, useGetVerifyTokenQuery } from '../api/auth'
 function getAuthURL(): string {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
-      return 'https://auth.dev.tryspace.com'
+      return 'https://auth.tryspace.com'
     case 'dev':
       return 'https://auth.dev.tryspace.com'
     case 'qa':
@@ -30,7 +30,9 @@ const Auth: React.FC = () => {
 
   const {
     isSuccess: isGetVerifyCodeSuccess,
-    data: getVerifyCodeData
+    data: getVerifyCodeData,
+    isError: isGetVerifyCodeError,
+    isLoading: isGetVerifyCodeLoading,
   } = useGetVerifyCodeQuery({ loginCode },
     {
       skip: !loginCode
@@ -69,7 +71,11 @@ const Auth: React.FC = () => {
       setCookie(null, 'immerToken', getVerifyCodeData?.immerToken, {
         domain: process.env.NEXT_PUBLIC_ENV === 'local' ? 'localhost' : 'tryspace.com',
       })
-      window.location.search = ''
+      setCookie(null, 'hubsToken', String(getVerifyCodeData?.hubsToken), {
+        domain: process.env.NEXT_PUBLIC_ENV === 'local' ? 'localhost' : 'tryspace.com',
+      })
+      dispatch(setAccountUsername({ username: String(getVerifyCodeData?.username) }))
+      window.history.pushState({}, document.title, window.location.pathname);
     }
   }, [isGetVerifyCodeSuccess, getVerifyCodeData])
 
@@ -80,10 +86,12 @@ const Auth: React.FC = () => {
   }, [isGetVerifyTokenSuccess, getVerifyTokenData, dispatch])
 
   useEffect(() => {
-    if (isGetVerifyTokenError && !isGetVerifyTokenLoading) {
+    if ((isGetVerifyTokenError && !isGetVerifyTokenLoading) || (isGetVerifyCodeError && !isGetVerifyCodeLoading)) {
       destroyCookie(null, 'immerToken')
+      destroyCookie(null, 'hubsToken')
+      window.location.href = `${getAuthURL()}/?redirect=${window.location.href}`
     }
-  }, [isGetVerifyTokenError, isGetVerifyTokenLoading])
+  }, [isGetVerifyTokenError, isGetVerifyTokenLoading, isGetVerifyCodeError, isGetVerifyCodeLoading])
 
   return <></>
 }

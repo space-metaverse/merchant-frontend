@@ -44,9 +44,9 @@ const routes = [
 ]
 
 const Topnav: React.FC = () => {
-  const {
-    data,
-  } = useGetMeQuery({})
+  // const {
+  //   data,
+  // } = useGetMeQuery({})
 
   const { username } = useAppSelector((state: any) => state.account)
 

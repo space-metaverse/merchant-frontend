@@ -1,3 +1,4 @@
+import { spaceApi } from '../api/space'
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { accountApi } from '../api/account'
@@ -11,10 +12,12 @@ export const store = configureStore({
     account: accountReducer,
     [authApi.reducerPath]: authApi.reducer,
     [accountApi.reducerPath]: accountApi.reducer,
+    [spaceApi.reducerPath]: spaceApi.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(
     authApi.middleware,
     accountApi.middleware,
+    spaceApi.middleware,
   )
 })
 
