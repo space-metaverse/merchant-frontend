@@ -57,6 +57,7 @@ const Topnav: React.FC = () => {
     // })
 
     destroyCookie(null, 'immerToken')
+    destroyCookie(null, 'hubsToken')
 
     location.reload()
   }

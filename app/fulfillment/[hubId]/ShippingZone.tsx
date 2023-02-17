@@ -1,4 +1,4 @@
-import { Chip } from "@space-metaverse-ag/space-ui"
+import { Button, Chip } from "@space-metaverse-ag/space-ui"
 import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
 import usaIcon from "../../../public/usa.svg"
@@ -83,6 +83,16 @@ const RateIcons = styled.div`
   gap: 1rem;
 `
 
+const EditActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #E5E5E5;
+`
+
 interface ShippingRateProps {
   type: string
   time: string
@@ -109,7 +119,16 @@ const ShippingRate = ({ type, time }: ShippingRateProps) => {
   )
 }
 
-export default function ShippingZone() {
+interface ShippingZoneProps {
+  id: string
+  isEditing: boolean
+  onEdit: (id: string) => void
+  onCancelEdit: (id: string) => void
+  onEditSave: (id: string) => void
+  onDelete: (id: string) => void
+}
+
+export default function ShippingZone({ id, isEditing, onEdit, onCancelEdit, onEditSave, onDelete }: ShippingZoneProps) {
   return (
     <Wrapper>
       <Header>
@@ -118,14 +137,20 @@ export default function ShippingZone() {
           <span>United States</span>
         </CountryWrapper>
         <HeaderIcons>
-          <Edit stroke='#71717A' />
-          <Delete stroke='#71717A' />
+          <Edit stroke='#71717A' onClick={() => onEdit(id)} />
+          <Delete stroke='#71717A' onClick={() => onDelete(id)} />
         </HeaderIcons>
       </Header>
       <ShippingRateList>
         <ShippingRate type='Express International' time='1 to 5 business days' />
         <ShippingRate type='Standard' time='3 to 4 business days' />
       </ShippingRateList>
+      {isEditing && (
+        <EditActions>
+          <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onCancelEdit(id)} />
+          <Button label={'Save'} size={"medium"} color={"blue"} outline onClick={() => onEditSave(id)} />
+        </EditActions>
+      )}
     </Wrapper>
   )
 }
