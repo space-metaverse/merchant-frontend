@@ -83,6 +83,11 @@ const RateIcons = styled.div`
   gap: 1rem;
 `
 
+const AddRate = styled.p`
+  padding-top: 1rem;
+  color: blue;
+`
+
 const EditActions = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -145,6 +150,7 @@ export default function ShippingZone({ id, isEditing, onEdit, onCancelEdit, onEd
         <ShippingRate type='Express International' time='1 to 5 business days' />
         <ShippingRate type='Standard' time='3 to 4 business days' />
       </ShippingRateList>
+      <AddRate>Add Rate</AddRate>
       {isEditing && (
         <EditActions>
           <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onCancelEdit(id)} />
