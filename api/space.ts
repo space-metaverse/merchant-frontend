@@ -30,6 +30,28 @@ interface GetMySpacesResponse {
   }>
 }
 
+interface GetSpaceRequest {
+  hubId: string
+}
+
+interface GetSpaceResponse {
+  allow_promotion: boolean
+  business_details: Record<any, any>
+  categories: string[]
+  commerce_type: string
+  created_by: string
+  description: string
+  hub_id: string
+  name: string
+  products: any[]
+  updated_at: string
+  url: string
+}
+
+interface GetShippingZoneRequest {
+  hubId: string
+}
+
 const getBaseURL = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
@@ -61,9 +83,29 @@ export const spaceApi = createApi({
         }
       })
     }),
+    getSpace: builder.query<GetSpaceResponse, GetSpaceRequest>({
+      query: ({ hubId }) => ({
+        url: `/api/v1/hubs/?hub_id=${hubId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
+    getShippingZones: builder.query<any, GetShippingZoneRequest>({
+      query: ({ hubId }) => ({
+        url: `/api/v1/shipping_zones?hub_sid=${hubId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
   })
 })
 
 export const {
   useGetMySpacesQuery,
+  useGetSpaceQuery,
+  useGetShippingZonesQuery
 } = spaceApi

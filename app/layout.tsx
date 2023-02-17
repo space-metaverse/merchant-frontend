@@ -8,7 +8,7 @@ import { store } from 'redux/store'
 import TopNav from '../components/TopNav'
 import StyledComponentsRegistry from '../lib/registry'
 import styled from 'styled-components'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { StyledTitle } from '../components/Title'
 
 const Wrapper = styled.div`
@@ -39,27 +39,6 @@ const Content = styled.div`
   flex-direction: column;
 `
 
-const options: SideNavProps["routes"] = [
-  {
-    Icon: Space,
-    route: '/spaces',
-    label: "My Spaces",
-    disabled: false,
-  },
-  {
-    Icon: Orders,
-    route: '/orders',
-    label: "My Orders",
-    disabled: false,
-  },
-  {
-    Icon: Cart,
-    route: '/fulfillment',
-    label: "Fulfillment Settings",
-    disabled: false,
-  },
-];
-
 export default function RootLayout({
   children,
 }: {
@@ -69,6 +48,38 @@ export default function RootLayout({
     back,
     push
   } = useRouter();
+
+  const pathname = usePathname();
+
+  const options: SideNavProps["routes"] = [
+    {
+      Icon: Space,
+      route: '/spaces',
+      label: "My Spaces",
+      disabled: false,
+    },
+    {
+      Icon: Orders,
+      route: '/orders',
+      label: "My Orders",
+      disabled: false,
+    },
+    {
+      Icon: Cart,
+      route: '/fulfillment',
+      label: "Fulfillment Settings",
+      disabled: (pathname || "")?.split?.('/').length < 3,
+    },
+  ];
+
+  const onNavigate = (route: string) => {
+    if (route === '/fulfillment') {
+      const hubId = (pathname || "")?.split?.('/')[2];
+      push(`/fulfillment/${hubId}`);
+    } else {
+      push(route);
+    }
+  }
 
   return (
     <html lang="en">
@@ -83,7 +94,7 @@ export default function RootLayout({
                 <SideNav
                   title="Merchant Manager"
                   routes={options}
-                  onNavigate={push}
+                  onNavigate={onNavigate}
                 />
                 <Content>
                   {children}

@@ -18,7 +18,7 @@ export default function Spaces() {
 
   return (
     <div>
-      <Title>Spaces</Title>
+      <Title>My Spaces</Title>
       <Grid>
         {data?.entries?.map((space) => (
           <Link href={`/spaces/${space.id}`}>

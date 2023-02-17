@@ -72,7 +72,7 @@ const Topnav: React.FC = () => {
         {
           icon: IconLogout,
           label: 'Logout',
-          callback: logout
+          callback: logout,
         }
       ]}
       logoRoute="https://app.tryspace.com"
