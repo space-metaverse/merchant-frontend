@@ -53,7 +53,7 @@ interface GetShippingZoneRequest {
 }
 
 export interface ShippingZoneType {
-  shipping_zone_id: string
+  shipping_zone_id?: number | string
   hub_sid: string
   country: string
   name: string
@@ -70,6 +70,16 @@ interface PostShippingZoneRequest {
 }
 
 interface PostShippingZoneResponse {
+  data: {
+    data: ShippingZoneType
+  }
+}
+
+interface PatchShippingZoneRequest {
+  data: ShippingZoneType
+}
+
+interface PatchShippingZoneResponse {
   data: {
     data: ShippingZoneType
   }
@@ -135,6 +145,16 @@ export const spaceApi = createApi({
         body
       })
     }),
+    patchShippingZone: builder.mutation<PatchShippingZoneResponse, PatchShippingZoneRequest>({
+      query: (body) => ({
+        url: `/api/v1/shipping_zone`,
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        },
+        body
+      })
+    }),
   })
 })
 
@@ -142,5 +162,6 @@ export const {
   useGetMySpacesQuery,
   useGetSpaceQuery,
   useGetShippingZonesQuery,
-  usePostShippingZoneMutation
+  usePostShippingZoneMutation,
+  usePatchShippingZoneMutation
 } = spaceApi

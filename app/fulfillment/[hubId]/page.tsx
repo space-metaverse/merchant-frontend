@@ -1,5 +1,5 @@
 "use client"
-import { ShippingZoneType, useGetShippingZonesQuery, useGetSpaceQuery } from "@/api/space"
+import { ShippingZoneType, useGetShippingZonesQuery, useGetSpaceQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
 import { Button, Modal, ModalProps } from "@space-metaverse-ag/space-ui"
 import { usePathname } from "next/navigation"
 import { useRef, useState } from "react"
@@ -52,6 +52,24 @@ export default function Fullfillment() {
     isLoading: isGetShippingLoading
   } = useGetShippingZonesQuery({ hubId: String(hubId) }, { skip: !hubId })
 
+  const [
+    postShippingZone,
+    {
+      data: postShippingZoneData,
+      error: postShippingZoneError,
+      isLoading: isPostShippingZoneLoading
+    },
+  ] = usePostShippingZoneMutation();
+
+  const [
+    patchShippingZone,
+    {
+      data: patchShippingZoneData,
+      error: patchShippingZoneError,
+      isLoading: isPatchShippingZoneLoading
+    },
+  ] = usePatchShippingZoneMutation();
+
   const onShippingZoneEdit = (id: string) => {
     console.log(id)
     setEditShippingZoneId(id)
@@ -61,13 +79,18 @@ export default function Fullfillment() {
     setEditShippingZoneId(null)
   }
 
-  const onShippingZoneEditSave = () => {
-    setEditShippingZoneId(null)
-  }
-
   const onShippingZoneDelete = (id: string) => {
     console.log(id)
     modalRef.current?.opened()
+  }
+
+  const onShippingZoneCreate = (shippingZone: ShippingZoneType) => {
+    postShippingZone({ data: shippingZone })
+  }
+
+  const onShippingZoneEditSave = (shippingZone: ShippingZoneType) => {
+    patchShippingZone({ data: shippingZone })
+    setEditShippingZoneId(null)
   }
 
   const groupedShippingZones: Record<string, ShippingZoneType[]> = getShippingData?.data?.reduce((acc: any, shippingZone: any) => {
@@ -95,9 +118,8 @@ export default function Fullfillment() {
           creatingShippingZone && (
             <ShippingZone
               id={"123"}
-              onEdit={onShippingZoneEdit}
               onCancelEdit={() => setCreatingShippingZone(false)}
-              onEditSave={onShippingZoneEditSave}
+              onEditSave={(zone: ShippingZoneType) => onShippingZoneCreate(zone)}
               onDelete={onShippingZoneDelete}
               isEditing={true}
               country={""}
@@ -109,7 +131,6 @@ export default function Fullfillment() {
           <ShippingZone
             key={country}
             id={country}
-            onEdit={onShippingZoneEdit}
             onCancelEdit={onShippingZoneCancelEdit}
             onEditSave={onShippingZoneEditSave}
             onDelete={onShippingZoneDelete}
