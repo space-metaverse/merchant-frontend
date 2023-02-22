@@ -9,7 +9,7 @@ import { useGetVerifyCodeQuery, useGetVerifyTokenQuery } from '../api/auth'
 function getAuthURL(): string {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
-      return 'https://auth.tryspace.com'
+      return 'https://auth.qa.tryspace.com'
     case 'dev':
       return 'https://auth.dev.tryspace.com'
     case 'qa':

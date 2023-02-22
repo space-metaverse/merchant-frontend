@@ -52,10 +52,33 @@ interface GetShippingZoneRequest {
   hubId: string
 }
 
+export interface ShippingZoneType {
+  shipping_zone_id: string
+  hub_sid: string
+  country: string
+  name: string
+  rate_name: string
+  rate_transit_time: number
+  shipping_price: number
+  price_conditions: boolean
+  order_min_value: number
+  order_max_value: number
+}
+
+interface PostShippingZoneRequest {
+  data: ShippingZoneType
+}
+
+interface PostShippingZoneResponse {
+  data: {
+    data: ShippingZoneType
+  }
+}
+
 const getBaseURL = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
-      return 'https://app.tryspace.com'
+      return 'https://metaverse-demo.com'
     case 'dev':
       return 'https://dev1-metaverse.com'
     case 'qa':
@@ -79,7 +102,8 @@ export const spaceApi = createApi({
         url: '/api/v1/media/search?source=rooms&filter=my&cursor=1',
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${cookies.hubsToken}`
+          Authorization: `Bearer ${cookies.hubsToken}`,
+          'Content-Type': 'application/json'
         }
       })
     }),
@@ -101,11 +125,22 @@ export const spaceApi = createApi({
         }
       })
     }),
+    postShippingZone: builder.mutation<PostShippingZoneResponse, PostShippingZoneRequest>({
+      query: (body) => ({
+        url: `/api/v1/shipping_zone`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        },
+        body
+      })
+    }),
   })
 })
 
 export const {
   useGetMySpacesQuery,
   useGetSpaceQuery,
-  useGetShippingZonesQuery
+  useGetShippingZonesQuery,
+  usePostShippingZoneMutation
 } = spaceApi

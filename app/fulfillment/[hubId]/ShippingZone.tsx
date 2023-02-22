@@ -3,6 +3,7 @@ import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
 import usaIcon from "../../../public/usa.svg"
 import Image from "next/image"
+import { ShippingZoneType } from "../../../api/space"
 
 const Wrapper = styled.div`
   border: 1px solid #E5E5E5;
@@ -101,9 +102,11 @@ const EditActions = styled.div`
 interface ShippingRateProps {
   type: string
   time: string
+  orderMin: number
+  orderMax: number
 }
 
-const ShippingRate = ({ type, time }: ShippingRateProps) => {
+const ShippingRate = ({ type, time, orderMin, orderMax }: ShippingRateProps) => {
   return (
     <RateWrapper>
       <RateInfo>
@@ -112,7 +115,7 @@ const ShippingRate = ({ type, time }: ShippingRateProps) => {
           <RateTime>{time}</RateTime>
         </div>
         <div>
-          <RatePrice>$100.00 and Up</RatePrice>
+          <RatePrice>${orderMin} - ${orderMax}</RatePrice>
           <Chip label={'Free'} color='green' />
         </div>
       </RateInfo>
@@ -131,15 +134,26 @@ interface ShippingZoneProps {
   onCancelEdit: (id: string) => void
   onEditSave: (id: string) => void
   onDelete: (id: string) => void
+  country: string
+  rates: ShippingZoneType[]
 }
 
-export default function ShippingZone({ id, isEditing, onEdit, onCancelEdit, onEditSave, onDelete }: ShippingZoneProps) {
+export default function ShippingZone({
+  id,
+  isEditing,
+  onEdit,
+  onCancelEdit,
+  onEditSave,
+  onDelete,
+  country,
+  rates
+}: ShippingZoneProps) {
   return (
     <Wrapper>
       <Header>
         <CountryWrapper>
           <Image src={usaIcon} alt='country' />
-          <span>United States</span>
+          <span>{country}</span>
         </CountryWrapper>
         <HeaderIcons>
           <Edit stroke='#71717A' onClick={() => onEdit(id)} />
@@ -147,8 +161,17 @@ export default function ShippingZone({ id, isEditing, onEdit, onCancelEdit, onEd
         </HeaderIcons>
       </Header>
       <ShippingRateList>
-        <ShippingRate type='Express International' time='1 to 5 business days' />
-        <ShippingRate type='Standard' time='3 to 4 business days' />
+        {
+          rates.map((rate, index) => (
+            <ShippingRate
+              key={index}
+              type={rate.rate_name}
+              time='1 to 5 business days'
+              orderMin={rate.order_min_value}
+              orderMax={rate.order_max_value}
+            />
+          ))
+        }
       </ShippingRateList>
       <AddRate>Add Rate</AddRate>
       {isEditing && (

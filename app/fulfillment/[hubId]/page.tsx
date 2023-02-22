@@ -1,12 +1,12 @@
 "use client"
-import { useGetShippingZonesQuery, useGetSpaceQuery } from "@/api/space"
+import { ShippingZoneType, useGetShippingZonesQuery, useGetSpaceQuery } from "@/api/space"
 import { Button, Modal, ModalProps } from "@space-metaverse-ag/space-ui"
 import { usePathname } from "next/navigation"
 import { useRef, useState } from "react"
 import styled from "styled-components"
 import Title from "../../../components/Title"
 import ShippingZone from "./ShippingZone"
-import shippingDelete from "../../../public/shipping-delete.svg"
+import shippingDelete from "../../../public/shipping.svg"
 import Image from "next/image"
 
 const CreateHeader = styled.div`
@@ -36,6 +36,7 @@ export default function Fullfillment() {
   const pathname = usePathname();
   const hubId = pathname?.split("/")[2];
   const [editShippingZoneId, setEditShippingZoneId] = useState<string | null>(null);
+  const [creatingShippingZone, setCreatingShippingZone] = useState<boolean>(false);
 
   const modalRef = useRef<ModalProps>(null);
 
@@ -69,22 +70,52 @@ export default function Fullfillment() {
     modalRef.current?.opened()
   }
 
+  const groupedShippingZones: Record<string, ShippingZoneType[]> = getShippingData?.data?.reduce((acc: any, shippingZone: any) => {
+    if (!acc[shippingZone.country]) {
+      acc[shippingZone.country] = []
+    }
+    acc[shippingZone.country].push(shippingZone)
+    return acc
+  }, {}) || {}
+
   return (
     <div>
-      <Title>Shipping Zones</Title>
+      <Title>Shipping Zones ({Object.entries(groupedShippingZones)?.length})</Title>
       <CreateHeader>
         <p>SHIPPING TO</p>
-        <Button label={'New Shipping Zone'} size={"medium"} color={"blue"} />
+        <Button
+          label={'New Shipping Zone'}
+          size={"medium"}
+          color={"blue"}
+          onClick={() => setCreatingShippingZone(true)}
+        />
       </CreateHeader>
       <ZonesList>
-        {new Array(3).fill(0).map((_, index) => (
+        {
+          creatingShippingZone && (
+            <ShippingZone
+              id={"123"}
+              onEdit={onShippingZoneEdit}
+              onCancelEdit={() => setCreatingShippingZone(false)}
+              onEditSave={onShippingZoneEditSave}
+              onDelete={onShippingZoneDelete}
+              isEditing={true}
+              country={""}
+              rates={[]}
+            />
+          )
+        }
+        {Object.entries(groupedShippingZones)?.map(([country, shippingZones], index) => (
           <ShippingZone
-            id={String(index)}
+            key={country}
+            id={country}
             onEdit={onShippingZoneEdit}
             onCancelEdit={onShippingZoneCancelEdit}
             onEditSave={onShippingZoneEditSave}
             onDelete={onShippingZoneDelete}
-            isEditing={editShippingZoneId === String(index)}
+            isEditing={editShippingZoneId === country}
+            rates={shippingZones}
+            country={country}
           />
         ))}
       </ZonesList>
