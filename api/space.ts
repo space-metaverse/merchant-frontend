@@ -58,7 +58,7 @@ export interface ShippingZoneType {
   country: string
   name: string
   rate_name: string
-  rate_transit_time: number
+  rate_transit_time: string
   shipping_price: number
   price_conditions: boolean
   order_min_value: number

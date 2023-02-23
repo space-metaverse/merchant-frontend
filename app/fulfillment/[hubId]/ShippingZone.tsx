@@ -1,4 +1,4 @@
-import { Button, Chip, Select } from "@space-metaverse-ag/space-ui"
+import { Button, Checkbox, Chip, Select, TextInput } from "@space-metaverse-ag/space-ui"
 import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
 import usaIcon from "../../../public/usa.svg"
@@ -108,27 +108,39 @@ const EditActions = styled.div`
 
 interface ShippingRateProps {
   id: string
+  hubId: string
+  country: string
   type: string
   time: string
+  price: number
   orderMin: number
   orderMax: number
-  onEdit: (id: string) => void
+  isPriceConditions: boolean
   isEditing: boolean
-  onSave: (id: string) => void
+  onEdit: (id: string) => void
   refetchShippingZones: () => void
 }
 
 const ShippingRate = ({
   id,
+  hubId,
+  country,
   type,
   time,
+  price,
   orderMin,
   orderMax,
-  onEdit,
+  isPriceConditions,
   isEditing,
-  onSave,
+  onEdit,
   refetchShippingZones
 }: ShippingRateProps) => {
+  const [shippingType, setShippingType] = useState(`${type} (${time})`)
+  const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
+  const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
+  const [shippingPrice, setShippingPrice] = useState(price ?? 0)
+  const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
+
   const [
     deleteShippingZone,
     {
@@ -139,11 +151,39 @@ const ShippingRate = ({
     },
   ] = useDeleteShippingZoneMutation();
 
+  const [
+    patchShippingZone,
+    {
+      data: patchShippingZoneData,
+      error: patchShippingZoneError,
+      isLoading: isPatchShippingZoneLoading,
+      isSuccess: isPatchShippingZoneSuccess,
+    },
+  ] = usePatchShippingZoneMutation();
+
   useEffect(() => {
-    if (isDeleteShippingZoneSuccess) {
+    if (isDeleteShippingZoneSuccess || isPatchShippingZoneSuccess) {
       refetchShippingZones();
+      onEdit('');
     }
-  }, [isDeleteShippingZoneSuccess])
+  }, [isDeleteShippingZoneSuccess, isPatchShippingZoneSuccess])
+
+  const handlePatchShippingZone = () => {
+    patchShippingZone({
+      data: {
+        shipping_zone_id: id,
+        hub_sid: hubId,
+        country: country,
+        name: shippingType.split('(')[0].slice(0, -1),
+        rate_name: shippingType.split('(')[0].slice(0, -1),
+        rate_transit_time: shippingType.split('(')[1].slice(0, -1),
+        shipping_price: shippingPrice,
+        price_conditions: priceConditionsChecked,
+        order_min_value: newOrderMin,
+        order_max_value: newOrderMax
+      }
+    })
+  }
 
   return (
     <RateWrapper>
@@ -151,17 +191,55 @@ const ShippingRate = ({
         <RateInfo>
           {
             isEditing ? (
-              <Select
-                options={[
-                  'Express (1 to 2 business days)',
-                  'Express International (1 to 5 business days)',
-                  'Standard (3 to 4 business days)',
-                  'Standard International (6 to 12 business days)',
-                  'Custom Flat Rate (no transit time)'
-                ]}
-                style={{ width: '16rem' }}
-                value={type}
-              />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
+                  <Select
+                    options={[
+                      'Express (1 to 2 business days)',
+                      'Express International (1 to 5 business days)',
+                      'Standard (3 to 4 business days)',
+                      'Standard International (6 to 12 business days)',
+                      'Custom Flat Rate (no transit time)'
+                    ]}
+                    style={{ width: '16rem' }}
+                    value={shippingType}
+                    onChange={(value) => setShippingType(value)}
+                  />
+                  <TextInput
+                    style={{ width: '16rem' }}
+                    value={shippingPrice}
+                    label='Shipping Price'
+                    type='number'
+                    onChange={(e) => setShippingPrice(Number(e.target.value))}
+                  />
+                  <Chip label={shippingPrice ? `$${shippingPrice}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
+                </div>
+                <div style={{ marginTop: '2rem' }}>
+                  <Checkbox
+                    label='Add price conditions'
+                    isChecked={priceConditionsChecked}
+                    onChange={() => setPriceConditionsChecked(!priceConditionsChecked)}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                    <TextInput
+                      style={{ width: '8rem' }}
+                      value={priceConditionsChecked ? newOrderMax : 'No Limit'}
+                      label='Order Min'
+                      type='number'
+                      disabled={!priceConditionsChecked}
+                      onChange={(e) => setNewOrderMin(Number(e.target.value))}
+                    />
+                    <TextInput
+                      style={{ width: '8rem' }}
+                      value={priceConditionsChecked ? newOrderMax : 'No Limit'}
+                      label='Order Max'
+                      type='number'
+                      disabled={!priceConditionsChecked}
+                      onChange={(e) => setNewOrderMax(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
             ) :
               (
                 <div>
@@ -170,10 +248,18 @@ const ShippingRate = ({
                 </div>
               )
           }
-          <div>
-            <RatePrice>${orderMin} - ${orderMax}</RatePrice>
-            <Chip label={'Free'} color='green' />
-          </div>
+          {
+            !isEditing && (
+              <div>
+                {
+                  isPriceConditions && (
+                    <RatePrice>${orderMin} - ${orderMax}</RatePrice>
+                  )
+                }
+                <Chip label={shippingPrice ? `$${shippingPrice}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
+              </div>
+            )
+          }
         </RateInfo>
         {
           !isEditing && (
@@ -193,14 +279,15 @@ const ShippingRate = ({
               color={'white'}
               outline
               onClick={() => onEdit("")}
-              disabled={isDeleteShippingZoneLoading}
+              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
             />
             <Button
               label={'Save Changes'}
               size={"medium"}
               color={"blue"}
               outline
-              onClick={() => onSave(id)}
+              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
+              onClick={handlePatchShippingZone}
             />
           </EditActions>
         )
@@ -272,14 +359,17 @@ export default function ShippingZone({
           rates.map((rate) => (
             <ShippingRate
               id={rate.shipping_zone_id || "123"}
+              hubId={rate.hub_sid}
+              country={rate.country}
               key={rate.shipping_zone_id}
               type={rate.rate_name}
-              time='1 to 5 business days'
+              time={rate.rate_transit_time}
+              price={rate.shipping_price}
               orderMin={rate.order_min_value}
               orderMax={rate.order_max_value}
-              onEdit={(id) => setEditingRateId(id)}
               isEditing={rate.shipping_zone_id === editingRateId}
-              onSave={handleEditSave}
+              isPriceConditions={rate.price_conditions}
+              onEdit={(id) => setEditingRateId(id)}
               refetchShippingZones={refetchShippingZones}
             />
           ))
