@@ -53,7 +53,7 @@ interface GetShippingZoneRequest {
 }
 
 export interface ShippingZoneType {
-  shipping_zone_id?: number | string
+  shipping_zone_id?: string
   hub_sid: string
   country: string
   name: string
@@ -155,6 +155,15 @@ export const spaceApi = createApi({
         body
       })
     }),
+    deleteShippingZone: builder.mutation<any, { shippingZoneId: string }>({
+      query: ({ shippingZoneId }) => ({
+        url: `/api/v1/shipping_zone?shipping_zone_id=${shippingZoneId}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    })
   })
 })
 
@@ -163,5 +172,6 @@ export const {
   useGetSpaceQuery,
   useGetShippingZonesQuery,
   usePostShippingZoneMutation,
-  usePatchShippingZoneMutation
+  usePatchShippingZoneMutation,
+  useDeleteShippingZoneMutation
 } = spaceApi

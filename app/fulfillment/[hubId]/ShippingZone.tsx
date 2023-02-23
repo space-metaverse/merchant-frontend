@@ -3,8 +3,8 @@ import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
 import usaIcon from "../../../public/usa.svg"
 import Image from "next/image"
-import { ShippingZoneType } from "../../../api/space"
-import { useState } from "react"
+import { ShippingZoneType, useDeleteShippingZoneMutation, usePatchShippingZoneMutation } from "../../../api/space"
+import { useEffect, useState } from "react"
 
 const Wrapper = styled.div`
   border: 1px solid #E5E5E5;
@@ -107,14 +107,15 @@ const EditActions = styled.div`
 `
 
 interface ShippingRateProps {
-  id: number
+  id: string
   type: string
   time: string
   orderMin: number
   orderMax: number
-  onEdit: (id: number) => void
+  onEdit: (id: string) => void
   isEditing: boolean
-  onSave: (id: number) => void
+  onSave: (id: string) => void
+  refetchShippingZones: () => void
 }
 
 const ShippingRate = ({
@@ -125,8 +126,25 @@ const ShippingRate = ({
   orderMax,
   onEdit,
   isEditing,
-  onSave
+  onSave,
+  refetchShippingZones
 }: ShippingRateProps) => {
+  const [
+    deleteShippingZone,
+    {
+      data: deleteShippingZoneData,
+      error: deleteShippingZoneError,
+      isLoading: isDeleteShippingZoneLoading,
+      isSuccess: isDeleteShippingZoneSuccess,
+    },
+  ] = useDeleteShippingZoneMutation();
+
+  useEffect(() => {
+    if (isDeleteShippingZoneSuccess) {
+      refetchShippingZones();
+    }
+  }, [isDeleteShippingZoneSuccess])
+
   return (
     <RateWrapper>
       <RateHeader>
@@ -161,7 +179,7 @@ const ShippingRate = ({
           !isEditing && (
             <RateIcons>
               <Edit stroke='#71717A' onClick={() => onEdit(id)} />
-              <Delete stroke='#71717A' />
+              <Delete stroke='#71717A' onClick={() => deleteShippingZone({ shippingZoneId: id })} />
             </RateIcons>
           )
         }
@@ -169,8 +187,21 @@ const ShippingRate = ({
       {
         isEditing && (
           <EditActions>
-            <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onEdit(0)} />
-            <Button label={'Save Changes'} size={"medium"} color={"blue"} outline onClick={() => onSave(id)} />
+            <Button
+              label={'Cancel'}
+              size={"small"}
+              color={'white'}
+              outline
+              onClick={() => onEdit("")}
+              disabled={isDeleteShippingZoneLoading}
+            />
+            <Button
+              label={'Save Changes'}
+              size={"medium"}
+              color={"blue"}
+              outline
+              onClick={() => onSave(id)}
+            />
           </EditActions>
         )
       }
@@ -186,6 +217,7 @@ interface ShippingZoneProps {
   onDelete: (id: string) => void
   country: string
   rates: ShippingZoneType[]
+  refetchShippingZones: () => void
 }
 
 export default function ShippingZone({
@@ -195,10 +227,11 @@ export default function ShippingZone({
   onEditSave,
   onDelete,
   country,
-  rates
+  rates,
+  refetchShippingZones
 }: ShippingZoneProps) {
   const [selectedCountry, setSelectedCountry] = useState<string>(country)
-  const [editingRateId, setEditingRateId] = useState<number>(0)
+  const [editingRateId, setEditingRateId] = useState<string>("")
 
   const handleEditSave = () => {
     const rate = rates?.find((rate) => rate.shipping_zone_id === editingRateId)
@@ -238,15 +271,16 @@ export default function ShippingZone({
         {
           rates.map((rate) => (
             <ShippingRate
-              id={Number(rate.shipping_zone_id)}
+              id={rate.shipping_zone_id || "123"}
               key={rate.shipping_zone_id}
               type={rate.rate_name}
               time='1 to 5 business days'
               orderMin={rate.order_min_value}
               orderMax={rate.order_max_value}
               onEdit={(id) => setEditingRateId(id)}
-              isEditing={Number(rate.shipping_zone_id) === editingRateId}
+              isEditing={rate.shipping_zone_id === editingRateId}
               onSave={handleEditSave}
+              refetchShippingZones={refetchShippingZones}
             />
           ))
         }

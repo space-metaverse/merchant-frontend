@@ -49,7 +49,8 @@ export default function Fullfillment() {
   const {
     data: getShippingData,
     error: getShippingError,
-    isLoading: isGetShippingLoading
+    isLoading: isGetShippingLoading,
+    refetch: refetchShippingZones
   } = useGetShippingZonesQuery({ hubId: String(hubId) }, { skip: !hubId })
 
   const [
@@ -124,6 +125,7 @@ export default function Fullfillment() {
               isEditing={true}
               country={""}
               rates={[]}
+              refetchShippingZones={refetchShippingZones}
             />
           )
         }
@@ -137,6 +139,7 @@ export default function Fullfillment() {
             isEditing={editShippingZoneId === country}
             rates={shippingZones}
             country={country}
+            refetchShippingZones={refetchShippingZones}
           />
         ))}
       </ZonesList>
