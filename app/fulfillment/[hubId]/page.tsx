@@ -1,5 +1,5 @@
 "use client"
-import { ShippingZoneType, useGetShippingZonesQuery, useGetSpaceQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
+import { ShippingZoneType, useGetShippingZonesQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
 import { Button, Modal, ModalProps } from "@space-metaverse-ag/space-ui"
 import { usePathname } from "next/navigation"
 import { useRef, useState } from "react"
@@ -41,12 +41,6 @@ export default function Fullfillment() {
   const modalRef = useRef<ModalProps>(null);
 
   const {
-    data: getSpaceData,
-    error: getSpaceError,
-    isLoading: isGetSpaceLoading
-  } = useGetSpaceQuery({ hubId: String(hubId) }, { skip: !hubId })
-
-  const {
     data: getShippingData,
     error: getShippingError,
     isLoading: isGetShippingLoading,
@@ -71,22 +65,14 @@ export default function Fullfillment() {
     },
   ] = usePatchShippingZoneMutation();
 
-  const onShippingZoneEdit = (id: string) => {
-    console.log(id)
-    setEditShippingZoneId(id)
-  }
-
   const onShippingZoneCancelEdit = () => {
     setEditShippingZoneId(null)
+    setCreatingShippingZone(false)
   }
 
   const onShippingZoneDelete = (id: string) => {
     console.log(id)
     modalRef.current?.opened()
-  }
-
-  const onShippingZoneCreate = (shippingZone: ShippingZoneType) => {
-    postShippingZone({ data: shippingZone })
   }
 
   const onShippingZoneEditSave = (shippingZone: ShippingZoneType) => {
@@ -118,9 +104,10 @@ export default function Fullfillment() {
         {
           creatingShippingZone && (
             <ShippingZone
-              id={"123"}
-              onCancelEdit={() => setCreatingShippingZone(false)}
-              onEditSave={(zone: ShippingZoneType) => onShippingZoneCreate(zone)}
+              id={"new"}
+              hubId={String(hubId)}
+              onCancelEdit={onShippingZoneCancelEdit}
+              onEditSave={onShippingZoneEditSave}
               onDelete={onShippingZoneDelete}
               isEditing={true}
               country={""}
@@ -133,6 +120,7 @@ export default function Fullfillment() {
           <ShippingZone
             key={country}
             id={country}
+            hubId={String(hubId)}
             onCancelEdit={onShippingZoneCancelEdit}
             onEditSave={onShippingZoneEditSave}
             onDelete={onShippingZoneDelete}

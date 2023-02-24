@@ -2,8 +2,11 @@ import { Button, Checkbox, Chip, Select, TextInput } from "@space-metaverse-ag/s
 import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
 import usaIcon from "../../../public/usa.svg"
+import worldIcon from "../../../public/world.png"
+import canadaIcon from "../../../public/canada.png"
+
 import Image from "next/image"
-import { ShippingZoneType, useDeleteShippingZoneMutation, usePatchShippingZoneMutation } from "../../../api/space"
+import { ShippingZoneType, useDeleteShippingZoneMutation, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
 import { useEffect, useState } from "react"
 
 const Wrapper = styled.div`
@@ -94,6 +97,11 @@ const RateIcons = styled.div`
 const AddRate = styled.p`
   padding-top: 1rem;
   color: blue;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `
 
 const EditActions = styled.div`
@@ -105,6 +113,20 @@ const EditActions = styled.div`
   padding-top: 2rem;
   border-top: 1px solid #E5E5E5;
 `
+
+const shippingOptions = [
+  'Express (1 to 2 business days)',
+  'Express International (1 to 5 business days)',
+  'Standard (3 to 4 business days)',
+  'Standard International (6 to 12 business days)',
+  'Custom Flat Rate (no transit time)'
+]
+
+const countryImages: Record<string, any> = {
+  usa: usaIcon,
+  world: worldIcon,
+  canada: canadaIcon
+}
 
 interface ShippingRateProps {
   id: string
@@ -118,6 +140,7 @@ interface ShippingRateProps {
   isPriceConditions: boolean
   isEditing: boolean
   onEdit: (id: string) => void
+  onCancel: (id: string) => void
   refetchShippingZones: () => void
 }
 
@@ -133,9 +156,10 @@ const ShippingRate = ({
   isPriceConditions,
   isEditing,
   onEdit,
+  onCancel,
   refetchShippingZones
 }: ShippingRateProps) => {
-  const [shippingType, setShippingType] = useState(`${type} (${time})`)
+  const [shippingType, setShippingType] = useState(type && time ? `${type} (${time})` : shippingOptions[0])
   const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
   const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
   const [shippingPrice, setShippingPrice] = useState(price ?? 0)
@@ -161,17 +185,28 @@ const ShippingRate = ({
     },
   ] = usePatchShippingZoneMutation();
 
+  const [
+    postShippingZone,
+    {
+      data: postShippingZoneData,
+      error: postShippingZoneError,
+      isLoading: isPostShippingZoneLoading,
+      isSuccess: isPostShippingZoneSuccess,
+    },
+  ] = usePostShippingZoneMutation();
+
   useEffect(() => {
-    if (isDeleteShippingZoneSuccess || isPatchShippingZoneSuccess) {
+    if (isDeleteShippingZoneSuccess || isPatchShippingZoneSuccess || isPostShippingZoneSuccess) {
       refetchShippingZones();
       onEdit('');
+      onCancel('new');
     }
-  }, [isDeleteShippingZoneSuccess, isPatchShippingZoneSuccess])
+  }, [isDeleteShippingZoneSuccess, isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
 
-  const handlePatchShippingZone = () => {
-    patchShippingZone({
+  const handleSaveShippingZone = () => {
+    const data = {
       data: {
-        shipping_zone_id: id,
+        ...(id !== 'new' && { shipping_zone_id: id }),
         hub_sid: hubId,
         country: country,
         name: shippingType.split('(')[0].slice(0, -1),
@@ -182,7 +217,12 @@ const ShippingRate = ({
         order_min_value: newOrderMin,
         order_max_value: newOrderMax
       }
-    })
+    }
+    if (id === 'new') {
+      postShippingZone(data)
+    } else {
+      patchShippingZone(data)
+    }
   }
 
   return (
@@ -194,13 +234,7 @@ const ShippingRate = ({
               <div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
                   <Select
-                    options={[
-                      'Express (1 to 2 business days)',
-                      'Express International (1 to 5 business days)',
-                      'Standard (3 to 4 business days)',
-                      'Standard International (6 to 12 business days)',
-                      'Custom Flat Rate (no transit time)'
-                    ]}
+                    options={shippingOptions}
                     style={{ width: '16rem' }}
                     value={shippingType}
                     onChange={(value) => setShippingType(value)}
@@ -223,7 +257,7 @@ const ShippingRate = ({
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
                     <TextInput
                       style={{ width: '8rem' }}
-                      value={priceConditionsChecked ? newOrderMax : 'No Limit'}
+                      value={priceConditionsChecked ? newOrderMin : 'No Limit'}
                       label='Order Min'
                       type='number'
                       disabled={!priceConditionsChecked}
@@ -278,7 +312,7 @@ const ShippingRate = ({
               size={"small"}
               color={'white'}
               outline
-              onClick={() => onEdit("")}
+              onClick={() => onCancel(id)}
               disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
             />
             <Button
@@ -287,7 +321,7 @@ const ShippingRate = ({
               color={"blue"}
               outline
               disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
-              onClick={handlePatchShippingZone}
+              onClick={handleSaveShippingZone}
             />
           </EditActions>
         )
@@ -296,29 +330,36 @@ const ShippingRate = ({
   )
 }
 
+const countryOptions = [
+  'USA', 'Canada', 'Rest of World'
+]
+
 interface ShippingZoneProps {
   id: string
+  hubId: string
   isEditing: boolean
+  country: string
+  rates: ShippingZoneType[]
   onCancelEdit: (id: string) => void
   onEditSave: (zone: ShippingZoneType) => void
   onDelete: (id: string) => void
-  country: string
-  rates: ShippingZoneType[]
   refetchShippingZones: () => void
 }
 
 export default function ShippingZone({
   id,
+  hubId,
   isEditing,
+  country,
+  rates,
   onCancelEdit,
   onEditSave,
   onDelete,
-  country,
-  rates,
   refetchShippingZones
 }: ShippingZoneProps) {
-  const [selectedCountry, setSelectedCountry] = useState<string>(country)
+  const [selectedCountry, setSelectedCountry] = useState<string>(country || 'USA')
   const [editingRateId, setEditingRateId] = useState<string>("")
+  const [addingNewRate, setAddingNewRate] = useState<boolean>(false)
 
   const handleEditSave = () => {
     const rate = rates?.find((rate) => rate.shipping_zone_id === editingRateId)
@@ -329,6 +370,17 @@ export default function ShippingZone({
         country: selectedCountry
       })
     }
+  }
+
+  const handleAddNewRate = () => {
+    setAddingNewRate(true)
+    setEditingRateId("new")
+  }
+
+  const handleCancelNewRate = () => {
+    setAddingNewRate(false)
+    setEditingRateId("")
+    onCancelEdit('new')
   }
 
   return (
@@ -345,7 +397,7 @@ export default function ShippingZone({
           ) :
             (
               <CountryWrapper>
-                <Image src={usaIcon} alt='country' />
+                <Image src={countryImages?.[country.toLowerCase()] ?? worldIcon} alt='country' />
                 <span>{country}</span>
               </CountryWrapper>
             )
@@ -370,12 +422,32 @@ export default function ShippingZone({
               isEditing={rate.shipping_zone_id === editingRateId}
               isPriceConditions={rate.price_conditions}
               onEdit={(id) => setEditingRateId(id)}
+              onCancel={handleCancelNewRate}
               refetchShippingZones={refetchShippingZones}
             />
           ))
         }
+        {
+          addingNewRate && (
+            <ShippingRate
+              id={"new"}
+              hubId={hubId}
+              country={country || selectedCountry}
+              type={""}
+              time={""}
+              price={0}
+              orderMin={0}
+              orderMax={0}
+              isEditing={'new' === editingRateId}
+              isPriceConditions={false}
+              onEdit={(id) => setEditingRateId("new")}
+              onCancel={handleCancelNewRate}
+              refetchShippingZones={refetchShippingZones}
+            />
+          )
+        }
       </ShippingRateList>
-      <AddRate>Add Rate</AddRate>
+      <AddRate onClick={handleAddNewRate}>Add Rate</AddRate>
       {isEditing && (
         <EditActions>
           <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onCancelEdit(id)} />
