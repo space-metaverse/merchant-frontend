@@ -10,6 +10,14 @@ import shippingDelete from "../../../public/shipping.svg"
 import Image from "next/image"
 import { permittedCountries } from "./permittedCountries"
 
+const PageWrapper = styled.div`
+  padding: 0 10%;
+
+  @media screen and (max-width: 1600px) {
+    padding: 0;
+  }
+`
+
 const CreateHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -105,7 +113,7 @@ export default function Fullfillment() {
   }
 
   return (
-    <div>
+    <PageWrapper>
       <Title>Shipping Zones ({Object.entries(groupedShippingZones)?.length})</Title>
       <CreateHeader>
         <p>SHIPPING TO</p>
@@ -186,6 +194,6 @@ export default function Fullfillment() {
 
         </ModalContent>
       </Modal>
-    </div>
+    </PageWrapper>
   )
 }
