@@ -22,6 +22,22 @@ function getAuthURL(): string {
   }
 }
 
+function getCookieDomain(): string {
+  switch (process.env.NEXT_PUBLIC_ENV) {
+    case 'local':
+      return 'localhost'
+    case 'dev':
+      return 'dev.tryspace.com'
+    case 'qa':
+      return 'qa.tryspace.com'
+    case 'prod':
+      return 'tryspace.com'
+    default:
+      console.log('No ENV set')
+      return 'dev.tryspace.com'
+  }
+}
+
 const Auth: React.FC = () => {
   const dispatch = useAppDispatch()
 
@@ -69,10 +85,10 @@ const Auth: React.FC = () => {
   useEffect(() => {
     if (isGetVerifyCodeSuccess && getVerifyCodeData?.immerToken) {
       setCookie(null, 'immerToken', getVerifyCodeData?.immerToken, {
-        domain: process.env.NEXT_PUBLIC_ENV === 'local' ? 'localhost' : 'tryspace.com',
+        domain: getCookieDomain()
       })
       setCookie(null, 'hubsToken', String(getVerifyCodeData?.hubsToken), {
-        domain: process.env.NEXT_PUBLIC_ENV === 'local' ? 'localhost' : 'tryspace.com',
+        domain: getCookieDomain()
       })
       dispatch(setAccountUsername({ username: String(getVerifyCodeData?.username) }))
       window.history.pushState({}, document.title, window.location.pathname);
