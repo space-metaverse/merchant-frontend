@@ -142,6 +142,8 @@ interface ShippingRateProps {
   onEdit: (id: string) => void
   onCancel: (id: string) => void
   refetchShippingZones: () => void
+  setModalData: (data: { country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }) => void
+  openModal: () => void
 }
 
 const ShippingRate = ({
@@ -157,23 +159,15 @@ const ShippingRate = ({
   isEditing,
   onEdit,
   onCancel,
-  refetchShippingZones
+  refetchShippingZones,
+  setModalData,
+  openModal,
 }: ShippingRateProps) => {
   const [shippingType, setShippingType] = useState(type && time ? `${type} (${time})` : shippingOptions[0])
   const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
   const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
   const [shippingPrice, setShippingPrice] = useState(price ?? 0)
   const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
-
-  const [
-    deleteShippingZone,
-    {
-      data: deleteShippingZoneData,
-      error: deleteShippingZoneError,
-      isLoading: isDeleteShippingZoneLoading,
-      isSuccess: isDeleteShippingZoneSuccess,
-    },
-  ] = useDeleteShippingZoneMutation();
 
   const [
     patchShippingZone,
@@ -196,12 +190,12 @@ const ShippingRate = ({
   ] = usePostShippingZoneMutation();
 
   useEffect(() => {
-    if (isDeleteShippingZoneSuccess || isPatchShippingZoneSuccess || isPostShippingZoneSuccess) {
+    if (isPatchShippingZoneSuccess || isPostShippingZoneSuccess) {
       refetchShippingZones();
       onEdit('');
       onCancel('new');
     }
-  }, [isDeleteShippingZoneSuccess, isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
+  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
 
   const handleSaveShippingZone = () => {
     const data = {
@@ -225,6 +219,11 @@ const ShippingRate = ({
     }
   }
 
+  const handleDeleteShippingZone = () => {
+    setModalData({ country, name: shippingType.split('(')[0].slice(0, -1), shippingZoneId: id, type: 'rate' })
+    openModal()
+  }
+
   return (
     <RateWrapper>
       <RateHeader>
@@ -238,6 +237,7 @@ const ShippingRate = ({
                     style={{ width: '16rem' }}
                     value={shippingType}
                     onChange={(value) => setShippingType(value)}
+                    label='Shipping Type'
                   />
                   <TextInput
                     style={{ width: '16rem' }}
@@ -299,7 +299,7 @@ const ShippingRate = ({
           !isEditing && (
             <RateIcons>
               <Edit stroke='#71717A' onClick={() => onEdit(id)} />
-              <Delete stroke='#71717A' onClick={() => deleteShippingZone({ shippingZoneId: id })} />
+              <Delete stroke='#71717A' onClick={handleDeleteShippingZone} />
             </RateIcons>
           )
         }
@@ -313,14 +313,14 @@ const ShippingRate = ({
               color={'white'}
               outline
               onClick={() => onCancel(id)}
-              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
+              disabled={isPatchShippingZoneLoading}
             />
             <Button
               label={'Save Changes'}
               size={"medium"}
               color={"blue"}
               outline
-              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
+              disabled={isPatchShippingZoneLoading}
               onClick={handleSaveShippingZone}
             />
           </EditActions>
@@ -342,8 +342,9 @@ interface ShippingZoneProps {
   rates: ShippingZoneType[]
   onCancelEdit: (id: string) => void
   onEditSave: (zone: ShippingZoneType) => void
-  onDelete: (id: string) => void
   refetchShippingZones: () => void
+  setModalData: (data: { country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }) => void
+  openModal: () => void
 }
 
 export default function ShippingZone({
@@ -354,8 +355,9 @@ export default function ShippingZone({
   rates,
   onCancelEdit,
   onEditSave,
-  onDelete,
-  refetchShippingZones
+  refetchShippingZones,
+  setModalData,
+  openModal
 }: ShippingZoneProps) {
   const [selectedCountry, setSelectedCountry] = useState<string>(country || 'USA')
   const [editingRateId, setEditingRateId] = useState<string>("")
@@ -383,6 +385,11 @@ export default function ShippingZone({
     onCancelEdit('new')
   }
 
+  const handleDelete = () => {
+    setModalData({ country, shippingZoneId: id, type: 'zone' })
+    openModal()
+  }
+
   return (
     <Wrapper>
       <Header>
@@ -403,7 +410,11 @@ export default function ShippingZone({
             )
         }
         <HeaderIcons>
-          <Delete stroke='#71717A' onClick={() => onDelete(id)} />
+          {
+            id !== 'new' && (
+              <Delete stroke='#71717A' onClick={handleDelete} />
+            )
+          }
         </HeaderIcons>
       </Header>
       <ShippingRateList>
@@ -424,6 +435,8 @@ export default function ShippingZone({
               onEdit={(id) => setEditingRateId(id)}
               onCancel={handleCancelNewRate}
               refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={openModal}
             />
           ))
         }
@@ -443,12 +456,18 @@ export default function ShippingZone({
               onEdit={(id) => setEditingRateId("new")}
               onCancel={handleCancelNewRate}
               refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={openModal}
             />
           )
         }
       </ShippingRateList>
-      <AddRate onClick={handleAddNewRate}>Add Rate</AddRate>
-      {isEditing && (
+      {
+        !addingNewRate && (
+          <AddRate onClick={handleAddNewRate}>Add Rate</AddRate>
+        )
+      }
+      {isEditing && id !== 'new' && (
         <EditActions>
           <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onCancelEdit(id)} />
           <Button label={'Save'} size={"medium"} color={"blue"} outline onClick={handleEditSave} />
