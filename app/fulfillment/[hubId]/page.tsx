@@ -43,6 +43,7 @@ export default function Fullfillment() {
   const [editShippingZoneId, setEditShippingZoneId] = useState<string | null>(null);
   const [creatingShippingZone, setCreatingShippingZone] = useState<boolean>(false);
   const [modalData, setModalData] = useState<{ country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }>({} as any);
+  const [isModalLoading, setIsModalLoading] = useState<boolean>(false);
 
   const modalRef = useRef<ModalProps>(null);
 
@@ -82,20 +83,24 @@ export default function Fullfillment() {
   }, {}) || {}
 
   const onShippingZoneDelete = () => {
+    setIsModalLoading(true)
     groupedShippingZones[modalData?.country].forEach(async (shippingZone: ShippingZoneType) => {
       await deleteShippingZone({ shippingZoneId: shippingZone.shipping_zone_id as string })
     })
     setTimeout(() => {
       modalRef.current?.closed()
       refetchShippingZones()
+      setIsModalLoading(false)
     }, 2000)
   }
 
   const onShippingRateDelete = async () => {
+    setIsModalLoading(true)
     await deleteShippingZone({ shippingZoneId: modalData?.shippingZoneId as string })
     setTimeout(() => {
       modalRef.current?.closed()
       refetchShippingZones()
+      setIsModalLoading(false)
     }, 2000)
   }
 
@@ -155,21 +160,30 @@ export default function Fullfillment() {
           <p>Are you sure you want to delete <PurpleText>
             {modalData.type === 'zone' ? permittedCountries?.find(c => c.code === modalData?.country)?.label : modalData?.name + ' - ' + permittedCountries?.find(c => c.code === modalData?.country)?.label}
           </PurpleText>?</p>
-          <Button
-            label={'Delete'}
-            size={"medium"}
-            color={"red"}
-            onClick={modalData.type === 'zone' ? onShippingZoneDelete : onShippingRateDelete}
-            style={{ width: '100%', marginTop: '1rem' }}
-          />
-          <Button
-            label={'Cancel'}
-            size={"small"}
-            color={'white'}
-            outline
-            onClick={() => modalRef.current?.closed()}
-            style={{ width: '100%' }}
-          />
+          {
+            isModalLoading ? (
+              <Spinner />
+            ) : (
+              <>
+                <Button
+                  label={'Delete'}
+                  size={"medium"}
+                  color={"red"}
+                  onClick={modalData.type === 'zone' ? onShippingZoneDelete : onShippingRateDelete}
+                  style={{ width: '100%', marginTop: '1rem' }}
+                />
+                <Button
+                  label={'Cancel'}
+                  size={"small"}
+                  color={'white'}
+                  outline
+                  onClick={() => modalRef.current?.closed()}
+                  style={{ width: '100%' }}
+                />
+              </>
+            )
+          }
+
         </ModalContent>
       </Modal>
     </div>
