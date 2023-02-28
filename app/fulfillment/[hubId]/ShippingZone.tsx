@@ -1,14 +1,12 @@
 import { Button, Checkbox, Chip, Select, TextInput } from "@space-metaverse-ag/space-ui"
 import { Delete, Edit } from "@space-metaverse-ag/space-ui/icons"
 import styled from "styled-components"
-import usaIcon from "../../../public/usa.svg"
 import worldIcon from "../../../public/world.png"
-import canadaIcon from "../../../public/canada.png"
 
 import Image from "next/image"
 import { ShippingZoneType, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
 import { useEffect, useState } from "react"
-import { Autocomplete, Box, InputAdornment, Stack, TextField } from "@mui/material"
+import { Autocomplete, Box, Stack, TextField } from "@mui/material"
 import { permittedCountries } from "./permittedCountries"
 
 const Wrapper = styled.div`
@@ -131,16 +129,11 @@ const shippingOptions = [
   'Custom Flat Rate (no transit time)'
 ]
 
-const countryImages: Record<string, any> = {
-  usa: usaIcon,
-  world: worldIcon,
-  canada: canadaIcon
-}
-
 interface ShippingRateProps {
   id: string
   hubId: string
   country: string
+  name: string
   type: string
   time: string
   price: number
@@ -159,6 +152,7 @@ const ShippingRate = ({
   id,
   hubId,
   country,
+  name,
   type,
   time,
   price,
@@ -172,9 +166,10 @@ const ShippingRate = ({
   setModalData,
   openModal,
 }: ShippingRateProps) => {
-  const [shippingType, setShippingType] = useState(type && time ? `${type} (${time})` : shippingOptions[0])
+  const [shippingType, setShippingType] = useState(shippingOptions.includes(`${name} (${time})`) ? `${type} (${time})` : 'Custom Flat Rate (no transit time)')
   const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
   const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
+  const [rateName, setRateName] = useState(name ?? "")
   const [shippingPrice, setShippingPrice] = useState(price ?? 0)
   const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
 
@@ -204,7 +199,7 @@ const ShippingRate = ({
       onEdit('');
       onCancel('new');
     }
-  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess, refetchShippingZones, onEdit, onCancel])
+  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
 
   const handleSaveShippingZone = () => {
     const data = {
@@ -212,8 +207,8 @@ const ShippingRate = ({
         ...(id !== 'new' && { shipping_zone_id: id }),
         hub_sid: hubId,
         country: country,
-        name: shippingType.split('(')[0].slice(0, -1),
-        rate_name: shippingType.split('(')[0].slice(0, -1),
+        name: shippingType.split('(')[0].slice(0, -1) === 'Custom Flat Rate' ? rateName || 'Custom Flat Rate' : shippingType.split('(')[0].slice(0, -1),
+        rate_name: shippingType.split('(')[0].slice(0, -1) === 'Custom Flat Rate' ? rateName || 'Custom Flat Rate' : shippingType.split('(')[0].slice(0, -1),
         rate_transit_time: shippingType.split('(')[1].slice(0, -1),
         shipping_price: shippingPrice,
         price_conditions: priceConditionsChecked,
@@ -243,11 +238,21 @@ const ShippingRate = ({
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
                   <Select
                     options={shippingOptions}
-                    style={{ width: '16rem' }}
+                    style={{ width: '100%' }}
                     value={shippingType}
                     onChange={(value) => setShippingType(value)}
-                    label='Shipping Type'
+                    label='Transit Time'
                   />
+                  {
+                    shippingType === 'Custom Flat Rate (no transit time)' && (
+                      <TextInput
+                        style={{ width: '16rem' }}
+                        value={rateName}
+                        label='Rate Name'
+                        onChange={(e) => setRateName(e.target.value)}
+                      />
+                    )
+                  }
                   <TextInput
                     style={{ width: '16rem' }}
                     value={shippingPrice}
@@ -286,7 +291,7 @@ const ShippingRate = ({
             ) :
               (
                 <div>
-                  <RateType>{type}</RateType>
+                  <RateType>{name}</RateType>
                   <RateTime>{time}</RateTime>
                 </div>
               )
@@ -338,10 +343,6 @@ const ShippingRate = ({
     </RateWrapper>
   )
 }
-
-const countryOptions = [
-  'USA', 'Canada', 'Rest of World'
-]
 
 interface ShippingZoneProps {
   id: string
@@ -477,6 +478,7 @@ export default function ShippingZone({
               id={rate.shipping_zone_id || "123"}
               hubId={rate.hub_sid}
               country={rate.country}
+              name={rate.rate_name}
               key={rate.shipping_zone_id}
               type={rate.rate_name}
               time={rate.rate_transit_time}
@@ -499,6 +501,7 @@ export default function ShippingZone({
               id={"new"}
               hubId={hubId}
               country={country || selectedCountry}
+              name={""}
               type={""}
               time={""}
               price={0}
