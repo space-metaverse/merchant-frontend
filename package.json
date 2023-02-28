@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@mui/material": "^5.11.11",
     "@next/font": "13.2.1",
     "@reduxjs/toolkit": "^1.9.3",
     "@space-metaverse-ag/space-ui": "^1.4.1",

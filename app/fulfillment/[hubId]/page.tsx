@@ -1,6 +1,6 @@
 "use client"
 import { ShippingZoneType, useDeleteShippingZoneMutation, useGetShippingZonesQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
-import { Button, Modal, ModalProps } from "@space-metaverse-ag/space-ui"
+import { Button, Modal, ModalProps, Spinner } from "@space-metaverse-ag/space-ui"
 import { usePathname } from "next/navigation"
 import { useRef, useState } from "react"
 import styled from "styled-components"
@@ -8,6 +8,7 @@ import Title from "../../../components/Title"
 import ShippingZone from "./ShippingZone"
 import shippingDelete from "../../../public/shipping.svg"
 import Image from "next/image"
+import { permittedCountries } from "./permittedCountries"
 
 const CreateHeader = styled.div`
   display: flex;
@@ -47,6 +48,7 @@ export default function Fullfillment() {
 
   const {
     data: getShippingData,
+    isLoading: getShippingLoading,
     refetch: refetchShippingZones
   } = useGetShippingZonesQuery({ hubId: String(hubId) }, { skip: !hubId })
 
@@ -126,27 +128,33 @@ export default function Fullfillment() {
             />
           )
         }
-        {Object.entries(groupedShippingZones)?.map(([country, shippingZones], index) => (
-          <ShippingZone
-            key={country}
-            id={country}
-            hubId={String(hubId)}
-            onCancelEdit={onShippingZoneCancelEdit}
-            onEditSave={onShippingZoneEditSave}
-            isEditing={editShippingZoneId === country}
-            rates={shippingZones}
-            country={country}
-            refetchShippingZones={refetchShippingZones}
-            setModalData={setModalData}
-            openModal={() => modalRef.current?.opened()}
-          />
-        ))}
+        {!getShippingLoading ? (
+          Object.entries(groupedShippingZones)?.map(([country, shippingZones], index) => (
+            <ShippingZone
+              key={country}
+              id={country}
+              hubId={String(hubId)}
+              onCancelEdit={onShippingZoneCancelEdit}
+              onEditSave={onShippingZoneEditSave}
+              isEditing={editShippingZoneId === country}
+              rates={shippingZones}
+              country={country}
+              refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={() => modalRef.current?.opened()}
+            />
+          ))
+        ) : (
+          <Spinner />
+        )}
       </ZonesList>
       <Modal ref={modalRef} title="Are you sure?">
         <ModalContent>
           <Image src={shippingDelete} alt="shipping-delete" />
           <h2>Delete Shipping {modalData.type === 'zone' ? 'Zone' : 'Rate'}</h2>
-          <p>Are you sure you want to delete <PurpleText>{modalData.type === 'zone' ? modalData.country : modalData?.name}</PurpleText>?</p>
+          <p>Are you sure you want to delete <PurpleText>
+            {modalData.type === 'zone' ? permittedCountries?.find(c => c.code === modalData?.country)?.label : modalData?.name + ' - ' + permittedCountries?.find(c => c.code === modalData?.country)?.label}
+          </PurpleText>?</p>
           <Button
             label={'Delete'}
             size={"medium"}

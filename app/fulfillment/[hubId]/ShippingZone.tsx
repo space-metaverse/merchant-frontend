@@ -8,6 +8,8 @@ import canadaIcon from "../../../public/canada.png"
 import Image from "next/image"
 import { ShippingZoneType, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
 import { useEffect, useState } from "react"
+import { Autocomplete, Box, InputAdornment, Stack, TextField } from "@mui/material"
+import { permittedCountries } from "./permittedCountries"
 
 const Wrapper = styled.div`
   border: 1px solid #E5E5E5;
@@ -359,7 +361,7 @@ export default function ShippingZone({
   setModalData,
   openModal
 }: ShippingZoneProps) {
-  const [selectedCountry, setSelectedCountry] = useState<string>(country || 'USA')
+  const [selectedCountry, setSelectedCountry] = useState<string>(country || 'US')
   const [editingRateId, setEditingRateId] = useState<string>("")
   const [addingNewRate, setAddingNewRate] = useState<boolean>(false)
 
@@ -395,17 +397,55 @@ export default function ShippingZone({
       <Header>
         {
           isEditing ? (
-            <Select
-              options={['USA', 'Canada', 'Rest of World']}
-              style={{ width: '16rem' }}
-              value={selectedCountry}
-              onChange={(value) => setSelectedCountry(value)}
-            />
+            <Stack flexDirection='row' alignItems='center' width='100%' gap={2}>
+              <Image
+                src={`https://flagcdn.com/w20/${selectedCountry?.toLowerCase()}.png`}
+                alt=""
+                width={20}
+                height={16}
+                loading="lazy"
+              />
+              <Autocomplete
+                options={permittedCountries}
+                onChange={(e: any, value: any) => setSelectedCountry(value.code)}
+                fullWidth
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Shipping Zone Country"
+                    variant="filled"
+                    inputProps={{
+                      ...params.inputProps,
+                      autoComplete: 'new-password',
+                    }}
+                  />
+                )}
+                openOnFocus
+                renderOption={(props, option) => (
+                  <Box
+                    {...props}
+                    sx={{ '& > img': { mr: 2, flexShrink: 0, borderRadius: '.25rem' } }}
+                    component="li"
+                  >
+                    <Image
+                      src={option?.code !== "ROW" ? `https://flagcdn.com/w20/${option?.code?.toLowerCase()}.png` : worldIcon}
+                      alt=""
+                      width={22}
+                      height={18}
+                      loading="lazy"
+                    />
+                    {option.label}
+                  </Box>
+                )}
+                autoHighlight
+                getOptionLabel={(option) => option.label}
+              />
+            </Stack>
           ) :
             (
               <CountryWrapper>
-                <Image src={countryImages?.[country.toLowerCase()] ?? worldIcon} alt='country' />
-                <span>{country}</span>
+                <Image src={country !== 'ROW' ? `https://flagcdn.com/w20/${country?.toLowerCase()}.png` : worldIcon} alt='country' width={22} height={18} />
+                <span>{permittedCountries?.find(c => c.code === country)?.label}</span>
               </CountryWrapper>
             )
         }
