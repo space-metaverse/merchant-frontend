@@ -6,8 +6,10 @@ import worldIcon from "../../../public/world.png"
 import canadaIcon from "../../../public/canada.png"
 
 import Image from "next/image"
-import { ShippingZoneType, useDeleteShippingZoneMutation, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
+import { ShippingZoneType, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
 import { useEffect, useState } from "react"
+import { Autocomplete, Box, InputAdornment, Stack, TextField } from "@mui/material"
+import { permittedCountries } from "./permittedCountries"
 
 const Wrapper = styled.div`
   border: 1px solid #E5E5E5;
@@ -142,6 +144,8 @@ interface ShippingRateProps {
   onEdit: (id: string) => void
   onCancel: (id: string) => void
   refetchShippingZones: () => void
+  setModalData: (data: { country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }) => void
+  openModal: () => void
 }
 
 const ShippingRate = ({
@@ -157,23 +161,15 @@ const ShippingRate = ({
   isEditing,
   onEdit,
   onCancel,
-  refetchShippingZones
+  refetchShippingZones,
+  setModalData,
+  openModal,
 }: ShippingRateProps) => {
   const [shippingType, setShippingType] = useState(type && time ? `${type} (${time})` : shippingOptions[0])
   const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
   const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
   const [shippingPrice, setShippingPrice] = useState(price ?? 0)
   const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
-
-  const [
-    deleteShippingZone,
-    {
-      data: deleteShippingZoneData,
-      error: deleteShippingZoneError,
-      isLoading: isDeleteShippingZoneLoading,
-      isSuccess: isDeleteShippingZoneSuccess,
-    },
-  ] = useDeleteShippingZoneMutation();
 
   const [
     patchShippingZone,
@@ -196,12 +192,12 @@ const ShippingRate = ({
   ] = usePostShippingZoneMutation();
 
   useEffect(() => {
-    if (isDeleteShippingZoneSuccess || isPatchShippingZoneSuccess || isPostShippingZoneSuccess) {
+    if (isPatchShippingZoneSuccess || isPostShippingZoneSuccess) {
       refetchShippingZones();
       onEdit('');
       onCancel('new');
     }
-  }, [isDeleteShippingZoneSuccess, isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
+  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess, refetchShippingZones, onEdit, onCancel])
 
   const handleSaveShippingZone = () => {
     const data = {
@@ -225,6 +221,11 @@ const ShippingRate = ({
     }
   }
 
+  const handleDeleteShippingZone = () => {
+    setModalData({ country, name: shippingType.split('(')[0].slice(0, -1), shippingZoneId: id, type: 'rate' })
+    openModal()
+  }
+
   return (
     <RateWrapper>
       <RateHeader>
@@ -238,6 +239,7 @@ const ShippingRate = ({
                     style={{ width: '16rem' }}
                     value={shippingType}
                     onChange={(value) => setShippingType(value)}
+                    label='Shipping Type'
                   />
                   <TextInput
                     style={{ width: '16rem' }}
@@ -299,7 +301,7 @@ const ShippingRate = ({
           !isEditing && (
             <RateIcons>
               <Edit stroke='#71717A' onClick={() => onEdit(id)} />
-              <Delete stroke='#71717A' onClick={() => deleteShippingZone({ shippingZoneId: id })} />
+              <Delete stroke='#71717A' onClick={handleDeleteShippingZone} />
             </RateIcons>
           )
         }
@@ -313,14 +315,14 @@ const ShippingRate = ({
               color={'white'}
               outline
               onClick={() => onCancel(id)}
-              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
+              disabled={isPatchShippingZoneLoading}
             />
             <Button
               label={'Save Changes'}
               size={"medium"}
               color={"blue"}
               outline
-              disabled={isDeleteShippingZoneLoading || isPatchShippingZoneLoading}
+              disabled={isPatchShippingZoneLoading}
               onClick={handleSaveShippingZone}
             />
           </EditActions>
@@ -342,8 +344,9 @@ interface ShippingZoneProps {
   rates: ShippingZoneType[]
   onCancelEdit: (id: string) => void
   onEditSave: (zone: ShippingZoneType) => void
-  onDelete: (id: string) => void
   refetchShippingZones: () => void
+  setModalData: (data: { country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }) => void
+  openModal: () => void
 }
 
 export default function ShippingZone({
@@ -354,10 +357,11 @@ export default function ShippingZone({
   rates,
   onCancelEdit,
   onEditSave,
-  onDelete,
-  refetchShippingZones
+  refetchShippingZones,
+  setModalData,
+  openModal
 }: ShippingZoneProps) {
-  const [selectedCountry, setSelectedCountry] = useState<string>(country || 'USA')
+  const [selectedCountry, setSelectedCountry] = useState<string>(country || 'US')
   const [editingRateId, setEditingRateId] = useState<string>("")
   const [addingNewRate, setAddingNewRate] = useState<boolean>(false)
 
@@ -383,27 +387,74 @@ export default function ShippingZone({
     onCancelEdit('new')
   }
 
+  const handleDelete = () => {
+    setModalData({ country, shippingZoneId: id, type: 'zone' })
+    openModal()
+  }
+
   return (
     <Wrapper>
       <Header>
         {
           isEditing ? (
-            <Select
-              options={['USA', 'Canada', 'Rest of World']}
-              style={{ width: '16rem' }}
-              value={selectedCountry}
-              onChange={(value) => setSelectedCountry(value)}
-            />
+            <Stack flexDirection='row' alignItems='center' width='100%' gap={2}>
+              <Image
+                src={`https://flagcdn.com/w20/${selectedCountry?.toLowerCase()}.png`}
+                alt=""
+                width={20}
+                height={16}
+                loading="lazy"
+              />
+              <Autocomplete
+                options={permittedCountries}
+                onChange={(e: any, value: any) => setSelectedCountry(value.code)}
+                fullWidth
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Shipping Zone Country"
+                    variant="filled"
+                    inputProps={{
+                      ...params.inputProps,
+                      autoComplete: 'new-password',
+                    }}
+                  />
+                )}
+                openOnFocus
+                renderOption={(props, option) => (
+                  <Box
+                    {...props}
+                    sx={{ '& > img': { mr: 2, flexShrink: 0, borderRadius: '.25rem' } }}
+                    component="li"
+                  >
+                    <Image
+                      src={option?.code !== "ROW" ? `https://flagcdn.com/w20/${option?.code?.toLowerCase()}.png` : worldIcon}
+                      alt=""
+                      width={22}
+                      height={18}
+                      loading="lazy"
+                    />
+                    {option.label}
+                  </Box>
+                )}
+                autoHighlight
+                getOptionLabel={(option) => option.label}
+              />
+            </Stack>
           ) :
             (
               <CountryWrapper>
-                <Image src={countryImages?.[country.toLowerCase()] ?? worldIcon} alt='country' />
-                <span>{country}</span>
+                <Image src={country !== 'ROW' ? `https://flagcdn.com/w20/${country?.toLowerCase()}.png` : worldIcon} alt='country' width={22} height={18} />
+                <span>{permittedCountries?.find(c => c.code === country)?.label}</span>
               </CountryWrapper>
             )
         }
         <HeaderIcons>
-          <Delete stroke='#71717A' onClick={() => onDelete(id)} />
+          {
+            id !== 'new' && (
+              <Delete stroke='#71717A' onClick={handleDelete} />
+            )
+          }
         </HeaderIcons>
       </Header>
       <ShippingRateList>
@@ -424,6 +475,8 @@ export default function ShippingZone({
               onEdit={(id) => setEditingRateId(id)}
               onCancel={handleCancelNewRate}
               refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={openModal}
             />
           ))
         }
@@ -443,12 +496,18 @@ export default function ShippingZone({
               onEdit={(id) => setEditingRateId("new")}
               onCancel={handleCancelNewRate}
               refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={openModal}
             />
           )
         }
       </ShippingRateList>
-      <AddRate onClick={handleAddNewRate}>Add Rate</AddRate>
-      {isEditing && (
+      {
+        !addingNewRate && (
+          <AddRate onClick={handleAddNewRate}>Add Rate</AddRate>
+        )
+      }
+      {isEditing && id !== 'new' && (
         <EditActions>
           <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => onCancelEdit(id)} />
           <Button label={'Save'} size={"medium"} color={"blue"} outline onClick={handleEditSave} />

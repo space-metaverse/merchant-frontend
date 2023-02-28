@@ -1,6 +1,6 @@
 "use client"
-import { ShippingZoneType, useGetShippingZonesQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
-import { Button, Modal, ModalProps } from "@space-metaverse-ag/space-ui"
+import { ShippingZoneType, useDeleteShippingZoneMutation, useGetShippingZonesQuery, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "@/api/space"
+import { Button, Modal, ModalProps, Spinner } from "@space-metaverse-ag/space-ui"
 import { usePathname } from "next/navigation"
 import { useRef, useState } from "react"
 import styled from "styled-components"
@@ -8,6 +8,7 @@ import Title from "../../../components/Title"
 import ShippingZone from "./ShippingZone"
 import shippingDelete from "../../../public/shipping.svg"
 import Image from "next/image"
+import { permittedCountries } from "./permittedCountries"
 
 const CreateHeader = styled.div`
   display: flex;
@@ -32,47 +33,39 @@ const ModalContent = styled.div`
   text-align: center;
 `
 
+const PurpleText = styled.span`
+  color: #6F3FF5;
+`
+
 export default function Fullfillment() {
   const pathname = usePathname();
   const hubId = pathname?.split("/")[2];
   const [editShippingZoneId, setEditShippingZoneId] = useState<string | null>(null);
   const [creatingShippingZone, setCreatingShippingZone] = useState<boolean>(false);
+  const [modalData, setModalData] = useState<{ country: string, name?: string, shippingZoneId: string, type: 'zone' | 'rate' }>({} as any);
 
   const modalRef = useRef<ModalProps>(null);
 
   const {
     data: getShippingData,
-    error: getShippingError,
-    isLoading: isGetShippingLoading,
+    isLoading: getShippingLoading,
     refetch: refetchShippingZones
   } = useGetShippingZonesQuery({ hubId: String(hubId) }, { skip: !hubId })
 
   const [
-    postShippingZone,
-    {
-      data: postShippingZoneData,
-      error: postShippingZoneError,
-      isLoading: isPostShippingZoneLoading
-    },
-  ] = usePostShippingZoneMutation();
+    patchShippingZone,
+    { },
+  ] = usePatchShippingZoneMutation();
 
   const [
-    patchShippingZone,
-    {
-      data: patchShippingZoneData,
-      error: patchShippingZoneError,
-      isLoading: isPatchShippingZoneLoading
-    },
-  ] = usePatchShippingZoneMutation();
+    deleteShippingZone,
+    { },
+  ] = useDeleteShippingZoneMutation();
+
 
   const onShippingZoneCancelEdit = () => {
     setEditShippingZoneId(null)
     setCreatingShippingZone(false)
-  }
-
-  const onShippingZoneDelete = (id: string) => {
-    console.log(id)
-    modalRef.current?.opened()
   }
 
   const onShippingZoneEditSave = (shippingZone: ShippingZoneType) => {
@@ -87,6 +80,24 @@ export default function Fullfillment() {
     acc[shippingZone.country].push(shippingZone)
     return acc
   }, {}) || {}
+
+  const onShippingZoneDelete = () => {
+    groupedShippingZones[modalData?.country].forEach(async (shippingZone: ShippingZoneType) => {
+      await deleteShippingZone({ shippingZoneId: shippingZone.shipping_zone_id as string })
+    })
+    setTimeout(() => {
+      modalRef.current?.closed()
+      refetchShippingZones()
+    }, 2000)
+  }
+
+  const onShippingRateDelete = async () => {
+    await deleteShippingZone({ shippingZoneId: modalData?.shippingZoneId as string })
+    setTimeout(() => {
+      modalRef.current?.closed()
+      refetchShippingZones()
+    }, 2000)
+  }
 
   return (
     <div>
@@ -108,36 +119,57 @@ export default function Fullfillment() {
               hubId={String(hubId)}
               onCancelEdit={onShippingZoneCancelEdit}
               onEditSave={onShippingZoneEditSave}
-              onDelete={onShippingZoneDelete}
               isEditing={true}
               country={""}
               rates={[]}
               refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={() => modalRef.current?.opened()}
             />
           )
         }
-        {Object.entries(groupedShippingZones)?.map(([country, shippingZones], index) => (
-          <ShippingZone
-            key={country}
-            id={country}
-            hubId={String(hubId)}
-            onCancelEdit={onShippingZoneCancelEdit}
-            onEditSave={onShippingZoneEditSave}
-            onDelete={onShippingZoneDelete}
-            isEditing={editShippingZoneId === country}
-            rates={shippingZones}
-            country={country}
-            refetchShippingZones={refetchShippingZones}
-          />
-        ))}
+        {!getShippingLoading ? (
+          Object.entries(groupedShippingZones)?.map(([country, shippingZones], index) => (
+            <ShippingZone
+              key={country}
+              id={country}
+              hubId={String(hubId)}
+              onCancelEdit={onShippingZoneCancelEdit}
+              onEditSave={onShippingZoneEditSave}
+              isEditing={editShippingZoneId === country}
+              rates={shippingZones}
+              country={country}
+              refetchShippingZones={refetchShippingZones}
+              setModalData={setModalData}
+              openModal={() => modalRef.current?.opened()}
+            />
+          ))
+        ) : (
+          <Spinner />
+        )}
       </ZonesList>
       <Modal ref={modalRef} title="Are you sure?">
         <ModalContent>
           <Image src={shippingDelete} alt="shipping-delete" />
-          <h2>Delete Shipping Zone</h2>
-          <p>Are you sure you want to delete from the shipping list?</p>
-          <Button label={'Delete'} size={"medium"} color={"red"} />
-          <Button label={'Cancel'} size={"small"} color={'white'} outline onClick={() => modalRef.current?.closed()} />
+          <h2>Delete Shipping {modalData.type === 'zone' ? 'Zone' : 'Rate'}</h2>
+          <p>Are you sure you want to delete <PurpleText>
+            {modalData.type === 'zone' ? permittedCountries?.find(c => c.code === modalData?.country)?.label : modalData?.name + ' - ' + permittedCountries?.find(c => c.code === modalData?.country)?.label}
+          </PurpleText>?</p>
+          <Button
+            label={'Delete'}
+            size={"medium"}
+            color={"red"}
+            onClick={modalData.type === 'zone' ? onShippingZoneDelete : onShippingRateDelete}
+            style={{ width: '100%', marginTop: '1rem' }}
+          />
+          <Button
+            label={'Cancel'}
+            size={"small"}
+            color={'white'}
+            outline
+            onClick={() => modalRef.current?.closed()}
+            style={{ width: '100%' }}
+          />
         </ModalContent>
       </Modal>
     </div>

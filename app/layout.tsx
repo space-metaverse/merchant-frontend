@@ -58,12 +58,12 @@ export default function RootLayout({
       label: "My Spaces",
       disabled: false,
     },
-    {
-      Icon: Orders,
-      route: '/orders',
-      label: "My Orders",
-      disabled: false,
-    },
+    // {
+    //   Icon: Orders,
+    //   route: '/orders',
+    //   label: "My Orders",
+    //   disabled: false,
+    // },
     {
       Icon: Cart,
       route: '/fulfillment',
