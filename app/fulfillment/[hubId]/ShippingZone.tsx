@@ -16,6 +16,13 @@ const Wrapper = styled.div`
   border-radius: 8px;
   width: 100%;
   padding: 1.5rem 1rem;
+
+  svg {
+    cursor: pointer;
+    :hover {
+      filter: brightness(0.5);
+    }
+  }
 `
 
 const Header = styled.div`
@@ -399,10 +406,10 @@ export default function ShippingZone({
           isEditing ? (
             <Stack flexDirection='row' alignItems='center' width='100%' gap={2}>
               <Image
-                src={`https://flagcdn.com/w20/${selectedCountry?.toLowerCase()}.png`}
+                src={selectedCountry !== 'ROW' ? `https://flagcdn.com/w20/${selectedCountry?.toLowerCase()}.png` : worldIcon}
                 alt=""
                 width={20}
-                height={16}
+                height={selectedCountry !== "ROW" ? 13 : 20}
                 loading="lazy"
               />
               <Autocomplete
@@ -430,8 +437,8 @@ export default function ShippingZone({
                     <Image
                       src={option?.code !== "ROW" ? `https://flagcdn.com/w20/${option?.code?.toLowerCase()}.png` : worldIcon}
                       alt=""
-                      width={22}
-                      height={18}
+                      width={20}
+                      height={option?.code !== "ROW" ? 13 : 20}
                       loading="lazy"
                     />
                     {option.label}
@@ -444,7 +451,13 @@ export default function ShippingZone({
           ) :
             (
               <CountryWrapper>
-                <Image src={country !== 'ROW' ? `https://flagcdn.com/w20/${country?.toLowerCase()}.png` : worldIcon} alt='country' width={22} height={18} />
+                <Image
+                  src={country !== 'ROW' ? `https://flagcdn.com/w20/${country?.toLowerCase()}.png` : worldIcon}
+                  alt='country'
+                  width={22}
+                  height={country !== "ROW" ? 13 : 20}
+                  loading="lazy"
+                />
                 <span>{permittedCountries?.find(c => c.code === country)?.label}</span>
               </CountryWrapper>
             )
