@@ -93,7 +93,7 @@ const Auth: React.FC = () => {
       dispatch(setAccountUsername({ username: String(getVerifyCodeData?.username) }))
       window.history.pushState({}, document.title, window.location.pathname);
     }
-  }, [isGetVerifyCodeSuccess, getVerifyCodeData])
+  }, [isGetVerifyCodeSuccess, getVerifyCodeData, dispatch])
 
   useEffect(() => {
     if (isGetVerifyTokenSuccess && getVerifyTokenData?.username) {

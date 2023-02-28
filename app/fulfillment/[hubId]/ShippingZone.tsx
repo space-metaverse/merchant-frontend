@@ -6,7 +6,7 @@ import worldIcon from "../../../public/world.png"
 import canadaIcon from "../../../public/canada.png"
 
 import Image from "next/image"
-import { ShippingZoneType, useDeleteShippingZoneMutation, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
+import { ShippingZoneType, usePatchShippingZoneMutation, usePostShippingZoneMutation } from "../../../api/space"
 import { useEffect, useState } from "react"
 
 const Wrapper = styled.div`
@@ -195,7 +195,7 @@ const ShippingRate = ({
       onEdit('');
       onCancel('new');
     }
-  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess])
+  }, [isPatchShippingZoneSuccess, isPostShippingZoneSuccess, refetchShippingZones, onEdit, onCancel])
 
   const handleSaveShippingZone = () => {
     const data = {

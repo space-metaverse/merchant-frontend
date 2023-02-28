@@ -21,7 +21,7 @@ export default function Home() {
       <Title>My Spaces</Title>
       <Grid>
         {data?.entries?.map((space) => (
-          <Link href={`/spaces/${space.id}`}>
+          <Link href={`/spaces/${space.id}`} key={space.id}>
             <Card image={space.images.preview.url} style={{ width: '20rem' }}>
               <p>{space.name}</p>
             </Card>
