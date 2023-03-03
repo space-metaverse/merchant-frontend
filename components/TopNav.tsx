@@ -1,8 +1,8 @@
 import { TopNav } from '@space-metaverse-ag/space-ui'
 import { Logout as IconLogout } from '@space-metaverse-ag/space-ui/icons'
-import { useGetMeQuery } from 'api/account'
-import { destroyCookie } from 'nookies'
+import { deleteCookie } from 'cookies-next';
 import { useAppSelector } from 'redux/hooks'
+import { getCookieDomain } from './Auth'
 
 const routes = [
   {
@@ -44,20 +44,18 @@ const routes = [
 ]
 
 const Topnav: React.FC = () => {
-  // const {
-  //   data,
-  // } = useGetMeQuery({})
 
   const { username } = useAppSelector((state: any) => state.account)
 
   const logout = async (): Promise<void> => {
-    // await global.analytics?.track?.('Signed Out', {
-    //   userId: data?.accountId as string,
-    //   username: username as string,
-    // })
-
-    destroyCookie(null, 'immerToken')
-    destroyCookie(null, 'hubsToken')
+    deleteCookie('immerToken', {
+      domain: getCookieDomain(),
+      path: '/'
+    })
+    deleteCookie('hubsToken', {
+      domain: getCookieDomain(),
+      path: '/'
+    })
 
     location.reload()
   }

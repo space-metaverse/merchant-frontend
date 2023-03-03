@@ -15,10 +15,7 @@ const Title = styled.h3`
 `
 
 const SideNav = () => {
-  const {
-    back,
-    push
-  } = useRouter();
+  const { push } = useRouter();
 
   const pathname = usePathname();
   const hubId = pathname?.split("/")[2];
@@ -71,7 +68,7 @@ const SideNav = () => {
       </div> : "My Spaces"}
       routes={options}
       onNavigate={onNavigate}
-      goBack={hubId ? back : undefined}
+      goBack={hubId ? () => push('/spaces') : undefined}
     />
   )
 }
