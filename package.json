@@ -14,7 +14,7 @@
     "@mui/material": "^5.11.11",
     "@next/font": "13.2.1",
     "@reduxjs/toolkit": "^1.9.3",
-    "@space-metaverse-ag/space-ui": "^1.4.1",
+    "@space-metaverse-ag/space-ui": "^1.5.3",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.1",
     "next": "^13.2.1",

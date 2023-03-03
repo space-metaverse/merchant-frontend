@@ -1,6 +1,5 @@
 "use client"
-import { SideNav, SideNavProps, ThemeProvider } from '@space-metaverse-ag/space-ui'
-import { Orders, Cart, Space } from '@space-metaverse-ag/space-ui/icons'
+import { ThemeProvider } from '@space-metaverse-ag/space-ui'
 import "@space-metaverse-ag/space-ui/index.css"
 import Auth from '../components/Auth'
 import { Provider } from 'react-redux'
@@ -8,8 +7,8 @@ import { store } from 'redux/store'
 import TopNav from '../components/TopNav'
 import StyledComponentsRegistry from '../lib/registry'
 import styled from 'styled-components'
-import { usePathname, useRouter } from 'next/navigation'
 import { StyledTitle } from '../components/Title'
+import SideNav from '../components/SideNav'
 
 const Wrapper = styled.div`
   gap: 3rem;
@@ -44,43 +43,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const {
-    back,
-    push
-  } = useRouter();
-
-  const pathname = usePathname();
-
-  const options: SideNavProps["routes"] = [
-    {
-      Icon: Space,
-      route: '/spaces',
-      label: "My Spaces",
-      disabled: false,
-    },
-    // {
-    //   Icon: Orders,
-    //   route: '/orders',
-    //   label: "My Orders",
-    //   disabled: false,
-    // },
-    {
-      Icon: Cart,
-      route: '/fulfillment',
-      label: "Fulfillment Settings",
-      disabled: (pathname || "")?.split?.('/').length < 3,
-    },
-  ];
-
-  const onNavigate = (route: string) => {
-    if (route === '/fulfillment') {
-      const hubId = (pathname || "")?.split?.('/')[2];
-      push(`/fulfillment/${hubId}`);
-    } else {
-      push(route);
-    }
-  }
-
   return (
     <html lang="en">
       <head />
@@ -91,11 +53,7 @@ export default function RootLayout({
               <Auth />
               <TopNav />
               <Wrapper>
-                <SideNav
-                  title="Merchant Manager"
-                  routes={options}
-                  onNavigate={onNavigate}
-                />
+                <SideNav />
                 <Content>
                   {children}
                 </Content>
