@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { parseCookies, setCookie, destroyCookie } from 'nookies'
+import { getCookies, setCookie, deleteCookie } from 'cookies-next'
 import { useAppDispatch } from 'redux/hooks'
 import { setAccountUsername } from 'redux/slices/account'
 
@@ -22,7 +22,7 @@ function getAuthURL(): string {
   }
 }
 
-function getCookieDomain(): string {
+export function getCookieDomain(): string {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
       return 'localhost'
@@ -65,7 +65,7 @@ const Auth: React.FC = () => {
     })
 
   useEffect(() => {
-    const cookies = parseCookies()
+    const cookies = getCookies()
 
     const localImmerToken = cookies.immerToken
 
@@ -84,11 +84,13 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (isGetVerifyCodeSuccess && getVerifyCodeData?.immerToken) {
-      setCookie(null, 'immerToken', getVerifyCodeData?.immerToken, {
-        domain: getCookieDomain()
+      setCookie('immerToken', getVerifyCodeData?.immerToken, {
+        domain: getCookieDomain(),
+        path: '/'
       })
-      setCookie(null, 'hubsToken', String(getVerifyCodeData?.hubsToken), {
-        domain: getCookieDomain()
+      setCookie('hubsToken', getVerifyCodeData?.hubsToken, {
+        domain: getCookieDomain(),
+        path: '/'
       })
       dispatch(setAccountUsername({ username: String(getVerifyCodeData?.username) }))
       window.history.pushState({}, document.title, window.location.pathname);
@@ -103,8 +105,14 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if ((isGetVerifyTokenError && !isGetVerifyTokenLoading) || (isGetVerifyCodeError && !isGetVerifyCodeLoading)) {
-      destroyCookie(null, 'immerToken')
-      destroyCookie(null, 'hubsToken')
+      deleteCookie('immerToken', {
+        domain: getCookieDomain(),
+        path: '/'
+      })
+      deleteCookie('hubsToken', {
+        domain: getCookieDomain(),
+        path: '/'
+      })
       window.location.href = `${getAuthURL()}/?redirect=${window.location.href}`
     }
   }, [isGetVerifyTokenError, isGetVerifyTokenLoading, isGetVerifyCodeError, isGetVerifyCodeLoading])

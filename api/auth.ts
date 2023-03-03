@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { parseCookies } from 'nookies'
+import { getCookies } from 'cookies-next'
 
 interface VerifyCodeRequest {
   loginCode: string
@@ -62,7 +62,7 @@ const getBaseURL = (): string => {
   }
 }
 
-const cookies = parseCookies()
+const cookies = getCookies()
 
 export const authApi = createApi({
   reducerPath: 'authApi',

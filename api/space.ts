@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { parseCookies } from 'nookies'
+import { getCookies } from 'cookies-next'
 
 interface GetMySpacesRequest {
 }
@@ -85,6 +85,79 @@ interface PatchShippingZoneResponse {
   }
 }
 
+interface SpaceOrder {
+  amount: number
+  created_at: string
+  crypto_amount: string
+  crypto_payment_from: string
+  crypto_payment_to: string
+  currency: string
+  customer: {
+    account_id: number
+    address: string
+    address_line_two: string
+    city: string
+    country: string
+    customer_sid: string
+    email: string
+    id: number
+    name: string
+    state: string
+    telephone: string
+    zipcode: string
+  }
+  hub_sid: string
+  live_mode: boolean
+  order_items: Array<{
+    listing_id: string
+    minting_links: string[]
+    order_type: string
+    product: {
+      name: string
+      product_sid: string
+      tax_rate: string
+      tax_status: boolean
+    }
+    product_variation: {
+      barcode: string
+      color: string
+      dimension: string
+      dimension_unit: string
+      mint: string
+      model_name: string
+      model_size: string
+      model_url: string
+      name: string
+      phygital_listing_id: string
+      price: string
+      product_sid: string
+      product_variation_sid: string
+      quantity: number
+      sale_price: string
+      shopify_variation_id: number
+      sku: string
+      thumbnail_name: string
+      thumbnail_size: string
+      thumbnail_url: string
+      weight: string
+      weight_unit: string
+    }
+    quantity: number
+  }>
+  order_sid: string
+  payment_id: string
+  shipping_cost: number
+  status: string
+}
+
+interface GetSpaceOrdersRequest {
+  hubId: string
+}
+
+interface GetSpaceOrdersResponse {
+  orders: SpaceOrder[]
+}
+
 const getBaseURL = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
@@ -101,7 +174,7 @@ const getBaseURL = (): string => {
   }
 }
 
-const cookies = parseCookies()
+const cookies = getCookies()
 
 export const spaceApi = createApi({
   reducerPath: 'spaceApi',
@@ -163,7 +236,16 @@ export const spaceApi = createApi({
           Authorization: `Bearer ${cookies.hubsToken}`
         }
       })
-    })
+    }),
+    getSpaceOrders: builder.query<GetSpaceOrdersResponse, GetSpaceOrdersRequest>({
+      query: ({ hubId }) => ({
+        url: `/api/v1/orders/?hub_id=${hubId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
   })
 })
 
@@ -173,5 +255,6 @@ export const {
   useGetShippingZonesQuery,
   usePostShippingZoneMutation,
   usePatchShippingZoneMutation,
-  useDeleteShippingZoneMutation
+  useDeleteShippingZoneMutation,
+  useGetSpaceOrdersQuery
 } = spaceApi
