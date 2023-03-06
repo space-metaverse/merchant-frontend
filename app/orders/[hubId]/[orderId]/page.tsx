@@ -170,13 +170,13 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Order Number</InfoTitle>
-                  <InfoValue>{order?.order_sid}</InfoValue>
+                  <InfoValue>{order?.order_sid || "-"}</InfoValue>
                 </Info>
               </Grid>
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Date Ordered</InfoTitle>
-                  <InfoValue>{order?.created_at && new Date(order.created_at)?.toLocaleString()}</InfoValue>
+                  <InfoValue>{order?.created_at ? new Date(order.created_at)?.toLocaleString() : "-"}</InfoValue>
                 </Info>
               </Grid>
               <Grid xs={12} md={6}>
@@ -194,25 +194,25 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Customer</InfoTitle>
-                  <InfoValue>{order?.customer?.name}</InfoValue>
+                  <InfoValue>{order?.customer?.name || "-"}</InfoValue>
                 </Info>
               </Grid>
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Delivery Address</InfoTitle>
-                  <InfoValue>{order?.customer?.address}</InfoValue>
+                  <InfoValue>{order?.customer?.address || "-"}</InfoValue>
                 </Info>
               </Grid>
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Email</InfoTitle>
-                  <InfoValue>{order?.customer?.email}</InfoValue>
+                  <InfoValue>{order?.customer?.email || "-"}</InfoValue>
                 </Info>
               </Grid>
               <Grid xs={12} md={6}>
                 <Info>
                   <InfoTitle>Phone</InfoTitle>
-                  <InfoValue>{order?.customer?.telephone}</InfoValue>
+                  <InfoValue>{order?.customer?.telephone || "-"}</InfoValue>
                 </Info>
               </Grid>
             </Grid>
