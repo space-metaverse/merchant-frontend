@@ -148,6 +148,11 @@ interface SpaceOrder {
   payment_id: string
   shipping_cost: number
   status: string
+  tracking_link: string
+  tracking_number: string
+  fulfillment_status: string
+  shipping_carrier: string
+  shipping_email_sent_at: string
 }
 
 interface GetSpaceOrdersRequest {
@@ -156,6 +161,22 @@ interface GetSpaceOrdersRequest {
 
 interface GetSpaceOrdersResponse {
   orders: SpaceOrder[]
+}
+
+interface PatchFulfilOrderRequest {
+  data: {
+    order_sid: string
+    fulfillment_status: string
+    shipping_carrier: string
+    shipping_email_sent_at: string
+    tracking_link: string
+    tracking_number: string
+  }
+}
+
+interface PatchFulfilOrderResponse {
+  message?: string
+  ok?: string
 }
 
 const getBaseURL = (): string => {
@@ -246,6 +267,16 @@ export const spaceApi = createApi({
         }
       })
     }),
+    patchFullfilOrder: builder.mutation<PatchFulfilOrderResponse, PatchFulfilOrderRequest>({
+      query: (body) => ({
+        url: '/api/v1/fulfill_order',
+        method: 'POST',
+        body,
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
   })
 })
 
@@ -256,5 +287,6 @@ export const {
   usePostShippingZoneMutation,
   usePatchShippingZoneMutation,
   useDeleteShippingZoneMutation,
-  useGetSpaceOrdersQuery
+  useGetSpaceOrdersQuery,
+  usePatchFullfilOrderMutation
 } = spaceApi
