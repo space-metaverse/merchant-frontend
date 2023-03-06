@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGetSpaceOrdersQuery, usePatchFullfilOrderMutation } from "../../../../api/space";
 import { ArrowBackUp } from "@space-metaverse-ag/space-ui/icons";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import styled from "styled-components";
 import { getStatusColor, getStatusLabel } from "../../../../lib/helpers";
 import { useEffect, useRef, useState } from "react";
@@ -25,18 +25,17 @@ const SectionHeader = styled.h4`
 `
 
 const Info = styled(Stack)`
-
+  gap: 0.5rem;
 `
 
-const InfoTitle = styled.p`
+const InfoTitle = styled.span`
   color: #71717A;
   font-family: 'Inter', sans-serif;
   
 `
 
-const InfoValue = styled.p`
+const InfoValue = styled.span`
   font-family: 'Inter', sans-serif;
-  margin-top: 0.5rem;
 `
 
 const Divider = styled.hr`
@@ -44,6 +43,11 @@ const Divider = styled.hr`
   border: 0;
   border-top: 1px solid #E5E7EB;
 `
+
+const formatPrice = (price?: number) => new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+}).format(price ?? 0)
 
 export default function OrderPage({ params }: { params: { hubId: string, orderId: string } }) {
   const [trackingNumber, setTrackingNumber] = useState('')
@@ -164,6 +168,33 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               </Grid>
             </Grid>
 
+            <Divider />
+
+            <Box>
+              <SectionHeader>Payment Info</SectionHeader>
+              <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
+                <InfoTitle>Sub Total</InfoTitle>
+                <InfoValue>{formatPrice(order?.amount)}</InfoValue>
+              </Stack>
+
+              <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%' pt={2}>
+                <InfoTitle>Taxes</InfoTitle>
+                <InfoValue>{formatPrice(0)}</InfoValue>
+              </Stack>
+
+              <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%' pt={2}>
+                <InfoTitle>Shipping</InfoTitle>
+                <InfoValue>{formatPrice(order?.shipping_cost)}</InfoValue>
+              </Stack>
+
+              <Divider style={{ margin: '1rem 0' }} />
+
+              <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
+                <InfoTitle>Total</InfoTitle>
+                <span>{formatPrice((order?.amount ?? 0) + (order?.shipping_cost ?? 0))}</span>
+              </Stack>
+            </Box>
+
           </Grid>
           <Grid xs={12} md={4}>
             <SectionHeader>Fulfillment info</SectionHeader>
@@ -193,6 +224,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
           </Grid>
         </Grid>
       </PageWrapper>
+
       <Modal ref={modalRef} title="Fulfill Order">
         <Stack gap={2}>
           <h4>Tracking Information</h4>
