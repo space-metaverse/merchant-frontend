@@ -1,6 +1,6 @@
 "use client"
 import Title from "../../../../components/Title"
-import { Chip } from "@space-metaverse-ag/space-ui"
+import { Button, Chip } from "@space-metaverse-ag/space-ui"
 import { useRouter } from "next/navigation";
 import { useGetSpaceOrdersQuery } from "../../../../api/space";
 import { ArrowBackUp } from "@space-metaverse-ag/space-ui/icons";
@@ -8,6 +8,14 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Stack } from "@mui/material";
 import styled from "styled-components";
 import { getStatusColor, getStatusLabel } from "../../../../lib/helpers";
+
+const PageWrapper = styled.div`
+  padding: 0 10%;
+
+  @media (max-width: 1300px) {
+    padding: 0;
+  }
+`
 
 const SectionHeader = styled.h4`
   margin-bottom: 2rem;
@@ -49,10 +57,10 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
   const order = getSpaceData?.orders.find(order => order.order_sid === orderId)
 
   return (
-    <div>
+    <PageWrapper>
       <Title><ArrowBackUp />Order {orderId}</Title>
       <Grid container>
-        <Grid xs={12} md={8}>
+        <Grid xs={12} md={8} pr={3} pb={4}>
 
           <SectionHeader>Order Info</SectionHeader>
           <Grid container rowSpacing={4}>
@@ -109,8 +117,31 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
         </Grid>
         <Grid xs={12} md={4}>
           <SectionHeader>Fulfillment info</SectionHeader>
+          <Stack gap={3}>
+            <Info>
+              <InfoTitle>Fulfillment Status</InfoTitle>
+              <Chip label={getStatusLabel(order?.status) || ''} color={getStatusColor(order?.status)} style={{ marginTop: '0.5rem' }} />
+            </Info>
+            <Info>
+              <InfoTitle>Tracking Number</InfoTitle>
+              <InfoValue>{order?.customer?.telephone || "-"}</InfoValue>
+            </Info>
+            <Info>
+              <InfoTitle>Tracking Number</InfoTitle>
+              <InfoValue>{order?.customer?.telephone || "-"}</InfoValue>
+            </Info>
+            <Info>
+              <InfoTitle>Tracking Number</InfoTitle>
+              <InfoValue>{order?.customer?.telephone || "-"}</InfoValue>
+            </Info>
+            <Info>
+              <InfoTitle>Tracking Number</InfoTitle>
+              <InfoValue>{order?.customer?.telephone || "-"}</InfoValue>
+            </Info>
+            <Button color="blue" size='small' label='Fulfill Order' />
+          </Stack>
         </Grid>
       </Grid>
-    </div>
+    </PageWrapper>
   )
 }
