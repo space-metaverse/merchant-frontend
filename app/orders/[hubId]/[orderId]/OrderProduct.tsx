@@ -53,7 +53,7 @@ export default function OrderProduct({ title, price, quantity, image, color, siz
 
         <Stack flexDirection='row' gap={2}>
           <Variation>
-            <VariationTitle>Quantity</VariationTitle> {quantity} <VariationBreak>|</VariationBreak>
+            <VariationTitle>Color</VariationTitle> {color || '?'} <VariationBreak>|</VariationBreak>
           </Variation>
 
           <Variation>
