@@ -141,6 +141,7 @@ interface SpaceOrder {
       thumbnail_url: string
       weight: string
       weight_unit: string
+      size: string
     }
     quantity: number
   }>
@@ -153,6 +154,7 @@ interface SpaceOrder {
   fulfillment_status: string
   shipping_carrier: string
   shipping_email_sent_at: string
+  notes: string
 }
 
 interface GetSpaceOrdersRequest {
