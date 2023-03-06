@@ -1,41 +1,13 @@
 "use client"
 import Title from "../../../components/Title"
 import { Chip, Spinner, Table } from "@space-metaverse-ag/space-ui"
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useGetSpaceOrdersQuery } from "../../../api/space";
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case "payment_succeeded":
-      return "Paid";
-    case "payment_failed":
-      return "Failed";
-    case "payment_pending":
-      return "Pending";
-    case "payment_processing":
-      return "Processing";
-    default:
-      return status;
-  }
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "payment_succeeded":
-      return "green";
-    case "payment_failed":
-      return "red";
-    case "payment_created":
-      return "blue";
-    case "payment_processing":
-      return "orange";
-    default:
-      return 'blue';
-  }
-}
+import { getStatusColor, getStatusLabel } from "../../../lib/helpers";
 
 export default function Orders() {
   const pathname = usePathname();
+  const router = useRouter();
   const hubId = pathname?.split("/")[2];
 
   const {
@@ -45,16 +17,22 @@ export default function Orders() {
   } = useGetSpaceOrdersQuery({ hubId: String(hubId) }, { skip: !hubId })
 
   const rows = (getSpaceData?.orders || []).map((order) => ({
+    key: order.order_sid,
     orderNumber: <span style={{ color: '#3332FE' }}>{order.order_sid}</span>,
     orderDate: new Date(order.created_at).toDateString(),
     customer: order.customer.name,
     items: order.order_items.length + " items",
-    status: <Chip label={getStatusLabel(order.status)} color={getStatusColor(order.status)} />,
+    status: <Chip label={getStatusLabel(order.status) || ''} color={getStatusColor(order.status)} />,
     total: new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(order.amount),
   }))
+
+  const handleRowClick = (row: any) => {
+    console.log(row)
+    router.push(`/orders/${hubId}/${row.key}`)
+  }
 
   return (
     <div>
@@ -68,6 +46,7 @@ export default function Orders() {
             rows={rows}
             columns={["Order #", "Order Date", "Customer", "Items", "Status", "Total"]}
             withBorder={false}
+            onRowClick={handleRowClick}
           />
         )
       }
