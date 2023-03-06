@@ -27,3 +27,8 @@ export const getStatusColor = (status?: string) => {
       return 'blue';
   }
 }
+
+export const formatPrice = (price?: number) => new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+}).format(price ?? 0)

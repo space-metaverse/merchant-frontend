@@ -1,14 +1,16 @@
 "use client"
 import Title from "../../../../components/Title"
-import { Button, Checkbox, Chip, Modal, ModalProps, TextInput } from "@space-metaverse-ag/space-ui"
+import { Button, Checkbox, Chip, Modal, ModalProps, Textarea, TextInput } from "@space-metaverse-ag/space-ui"
 import { useRouter } from "next/navigation";
 import { useGetSpaceOrdersQuery, usePatchFullfilOrderMutation } from "../../../../api/space";
 import { ArrowBackUp } from "@space-metaverse-ag/space-ui/icons";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Box, Stack } from "@mui/material";
 import styled from "styled-components";
-import { getStatusColor, getStatusLabel } from "../../../../lib/helpers";
+import { formatPrice, getStatusColor, getStatusLabel } from "../../../../lib/helpers";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import OrderProduct from "./OrderProduct";
 
 const PageWrapper = styled.div`
   padding: 0 10%;
@@ -44,16 +46,12 @@ const Divider = styled.hr`
   border-top: 1px solid #E5E7EB;
 `
 
-const formatPrice = (price?: number) => new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-}).format(price ?? 0)
-
 export default function OrderPage({ params }: { params: { hubId: string, orderId: string } }) {
   const [trackingNumber, setTrackingNumber] = useState('')
   const [trackingLink, setTrackingLink] = useState('')
   const [shippingCarrier, setShippingCarrier] = useState('')
   const [sendNotificationEmail, setSendNotificationEmail] = useState(false)
+  const [notes, setNotes] = useState('')
 
   const router = useRouter()
   const { hubId, orderId } = params
@@ -87,7 +85,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
         tracking_link: trackingLink,
         tracking_number: trackingNumber,
         shipping_carrier: shippingCarrier,
-        fulfillment_status: 'Fulfilled',
+        fulfillment_status: 'Unfulfilled',
         shipping_email_sent_at: 'true'
       }
     })
@@ -171,6 +169,28 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
             <Divider />
 
             <Box>
+              <SectionHeader>Items</SectionHeader>
+              <Stack>
+                {order?.order_items.map((item, index) => (
+                  <OrderProduct
+                    key={item.product.name + index}
+                    quantity={item.quantity}
+                    title={item.product.name}
+                    price={0}
+                    image={item.product_variation?.thumbnail_url}
+                    color={item.product_variation?.color}
+                    size={item.product_variation?.size}
+                    sku={item.product_variation?.sku}
+                    type={order?.crypto_amount ? 'Phygital' : 'Digital'}
+                    isDark={index % 2 === 0}
+                  />
+                ))}
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            <Box>
               <SectionHeader>Payment Info</SectionHeader>
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
                 <InfoTitle>Sub Total</InfoTitle>
@@ -191,8 +211,20 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
 
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
                 <InfoTitle>Total</InfoTitle>
-                <span>{formatPrice((order?.amount ?? 0) + (order?.shipping_cost ?? 0))}</span>
+                <span style={{ fontSize: '1.25rem' }}>{formatPrice((order?.amount ?? 0) + (order?.shipping_cost ?? 0))}</span>
               </Stack>
+            </Box>
+
+            <Divider />
+
+            <Box>
+              <SectionHeader>Notes</SectionHeader>
+              <Textarea
+                value={order?.notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder='Add your notes and wishes about this order'
+              />
+              <Button label='Post' size='small' color="blue" outline style={{ marginTop: '1rem', float: 'right' }} />
             </Box>
 
           </Grid>
@@ -209,7 +241,11 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               </Info>
               <Info>
                 <InfoTitle>Tracking Link</InfoTitle>
-                <InfoValue>{order?.tracking_link || "-"}</InfoValue>
+                <InfoValue>
+                  <Link href={order?.tracking_link || "-"} target='_blank'>
+                    {order?.tracking_link || "-"}
+                  </Link>
+                </InfoValue>
               </Info>
               <Info>
                 <InfoTitle>Shipping Carrier</InfoTitle>

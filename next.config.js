@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     domains: [
       'flagcdn.com',
+      'space-staging-assets.metaverse-demo.com',
+      'tryspace-prod-assets.tryspace-internal.com'
     ],
   },
 }
