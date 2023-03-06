@@ -3,7 +3,7 @@ import Title from "../../../../components/Title"
 import { Button, Checkbox, Chip, Modal, ModalProps, Textarea, TextInput } from "@space-metaverse-ag/space-ui"
 import { useRouter } from "next/navigation";
 import { useGetSpaceOrdersQuery, usePatchFullfilOrderMutation } from "../../../../api/space";
-import { ArrowBackUp } from "@space-metaverse-ag/space-ui/icons";
+import { ArrowBackUp, ArrowLeft, ArrowRight } from "@space-metaverse-ag/space-ui/icons";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Box, Stack } from "@mui/material";
 import styled from "styled-components";
@@ -44,6 +44,20 @@ const Divider = styled.hr`
   margin: 2rem 0;
   border: 0;
   border-top: 1px solid #E5E7EB;
+`
+
+const OrderButton = styled.div`
+  border-radius: 200px;
+  border: 1px solid #3332FE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+
+  &:hover {
+    cursor: pointer;
+    background: #3232fe1a;
+  }
 `
 
 export default function OrderPage({ params }: { params: { hubId: string, orderId: string } }) {
@@ -107,10 +121,47 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
     }
   }, [isPatchFullfilOrderSuccess, modalRef])
 
+  const handleNextOrder = () => {
+    if (!getSpaceOrdersData?.orders) return
+    const nextIndex = getSpaceOrdersData?.orders?.findIndex(order => order?.order_sid === orderId) + 1
+    const nextOrder = getSpaceOrdersData?.orders?.[nextIndex]
+    if (nextOrder) {
+      router.push(`/orders/${hubId}/${nextOrder?.order_sid}`)
+    }
+  }
+
+  const handlePreviousOrder = () => {
+    if (!getSpaceOrdersData?.orders) return
+    const nextIndex = getSpaceOrdersData?.orders?.findIndex(order => order?.order_sid === orderId) - 1
+    const nextOrder = getSpaceOrdersData?.orders?.[nextIndex]
+    if (nextOrder) {
+      router.push(`/orders/${hubId}/${nextOrder?.order_sid}`)
+    }
+  }
+
   return (
     <>
       <PageWrapper>
-        <Title><ArrowBackUp onClick={() => router.push(`/orders/${hubId}`)} />Order {orderId}</Title>
+        <Title>
+          <Stack flexDirection='row' justifyContent='space-between' width='100%'>
+            <Stack flexDirection='row' gap={2}>
+              <ArrowBackUp onClick={() => router.push(`/orders/${hubId}`)} />Order {orderId}
+            </Stack>
+
+            <Stack flexDirection='row' gap={2}>
+
+              <OrderButton onClick={handlePreviousOrder}>
+                <ArrowLeft stroke="#3332FE" />
+              </OrderButton>
+
+              <OrderButton onClick={handleNextOrder}>
+                <ArrowRight stroke="#3332FE" />
+              </OrderButton>
+            </Stack>
+
+          </Stack>
+        </Title>
+
         <Grid container>
           <Grid xs={12} md={8} pr={4} pb={4}>
 
