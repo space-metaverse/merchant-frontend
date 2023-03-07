@@ -17,6 +17,8 @@ export const getStatusLabel = (status?: string) => {
 
 export const getStatusColor = (status?: string) => {
   switch (status) {
+    case "Fulfilled":
+      return "green";
     case "payment_succeeded":
       return "green";
     case "payment_failed":
