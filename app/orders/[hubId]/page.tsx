@@ -20,9 +20,11 @@ export default function Orders() {
     isLoading: isGetSpaceLoading
   } = useGetSpaceOrdersQuery({ hubId: String(hubId) }, { skip: !hubId })
 
-  const rows = (getSpaceData?.orders || []).filter(row => {
+  const rows = (getSpaceData?.orders || [])?.filter(row => row.status !== 'payment_processing')
+
+  const filteredRows = rows.filter(row => {
     if (tabFilter === 'Unfulfilled') {
-      return row.fulfillment_status !== 'Fulfilled'
+      return row.fulfillment_status && row.fulfillment_status !== 'Fulfilled'
     } else if (tabFilter === 'Return Requests') {
       return true
     } else {
@@ -33,8 +35,10 @@ export default function Orders() {
     orderNumber: <span style={{ color: '#3332FE' }}>{order.order_sid}</span>,
     orderDate: new Date(order.created_at).toDateString(),
     customer: order.customer.name,
-    items: order.order_items.length + " items",
     status: <Chip label={getStatusLabel(order.status) || ''} color={getStatusColor(order.status)} />,
+    items: order.order_items.length + " items",
+    fulfillmentStatus: <Chip label={getStatusLabel(order.fulfillment_status) || 'N/A'} color={getStatusColor(order.fulfillment_status)} />,
+    deliveryType: order.delivery_type || "-",
     total: new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -47,7 +51,7 @@ export default function Orders() {
   }
 
   const tabs = useMemo(() => ([
-    `Unfilfilled (${getSpaceData?.orders?.filter((order) => order.fulfillment_status !== 'Fulfilled').length || 0})`,
+    `Unfilfilled (${getSpaceData?.orders?.filter((order) => order.fulfillment_status && order.fulfillment_status !== 'Fulfilled').length || 0})`,
     `Return Requests (${0})`,
     `All Orders (${getSpaceData?.orders?.length || 0})`,
   ]), [getSpaceData?.orders])
@@ -87,13 +91,13 @@ export default function Orders() {
         {/* <TextInput placeholder='Search orders' label="Search" /> */}
       </Stack>
       {
-        rows && rows.length === 0 && !isGetSpaceLoading && <p>No orders yet</p>
+        filteredRows.length === 0 && !isGetSpaceLoading && <p>No orders yet</p>
       }
       {
-        rows && rows.length > 0 && !isGetSpaceLoading && (
+        filteredRows.length > 0 && !isGetSpaceLoading && (
           <Table
-            rows={rows}
-            columns={["Order #", "Order Date", "Customer", "Items", "Status", "Total"]}
+            rows={filteredRows}
+            columns={["Order #", "Order Date", "Customer", "Payment Status", "Items", "Fulfillment Status", "Delivery Type", "Total"]}
             withBorder={false}
             onRowClick={handleRowClick}
           />

@@ -2,6 +2,8 @@ export const getStatusLabel = (status?: string) => {
   switch (status) {
     case "payment_succeeded":
       return "Paid";
+    case "payment_created":
+      return "Payment Created";
     case "payment_failed":
       return "Failed";
     case "payment_pending":
