@@ -25,6 +25,8 @@ export default function Orders() {
   const filteredRows = rows.filter(row => {
     if (tabFilter === 'Unfulfilled') {
       return row.fulfillment_status && row.fulfillment_status !== 'Fulfilled'
+    } else if (tabFilter === 'Fulfilled') {
+      return row.fulfillment_status && row.fulfillment_status === 'Fulfilled'
     } else if (tabFilter === 'Return Requests') {
       return true
     } else {
@@ -37,35 +39,37 @@ export default function Orders() {
     customer: order.customer.name,
     status: <Chip label={getStatusLabel(order.status) || ''} color={getStatusColor(order.status)} />,
     items: order.order_items.length + " items",
-    fulfillmentStatus: <Chip label={getStatusLabel(order.fulfillment_status) || 'N/A'} color={getStatusColor(order.fulfillment_status)} />,
+    fulfillmentStatus: <Chip label={getStatusLabel(order.fulfillment_status) || 'Unfulfilled'} color={getStatusColor(order.fulfillment_status)} />,
     deliveryType: order.delivery_type || "-",
     total: new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(order.amount),
-  }))
+    }).format((order.amount / 100) + (order.shipping_cost / 100)),
+  })).reverse()
 
   const handleRowClick = (row: any) => {
-    console.log(row)
     router.push(`/orders/${hubId}/${row.key}`)
   }
 
   const tabs = useMemo(() => ([
-    `Unfilfilled (${getSpaceData?.orders?.filter((order) => order.fulfillment_status && order.fulfillment_status !== 'Fulfilled').length || 0})`,
+    `Unfulfilled (${rows?.filter((order) => order.fulfillment_status && order.fulfillment_status !== 'Fulfilled').length || 0})`,
+    `Fulfilled (${rows?.filter((order) => order.fulfillment_status === 'Fulfilled').length || 0})`,
     `Return Requests (${0})`,
-    `All Orders (${getSpaceData?.orders?.length || 0})`,
-  ]), [getSpaceData?.orders])
+    `All Orders (${rows?.length || 0})`,
+  ]), [rows])
 
   const activeTab = useMemo(() => {
     switch (tabFilter) {
       case 'Unfulfilled':
         return tabs[0]
-      case 'Return Requests':
+      case 'Fulfilled':
         return tabs[1]
+      case 'Return Requests':
+        return tabs[2]
       case 'All Orders':
-        return tabs[2]
+        return tabs[3]
       default:
-        return tabs[2]
+        return tabs[3]
     }
   }, [tabFilter, tabs])
 
@@ -75,9 +79,12 @@ export default function Orders() {
         setTabFilter('Unfulfilled')
         break;
       case tabs[1]:
-        setTabFilter('Return Requests')
+        setTabFilter('Fulfilled')
         break;
       case tabs[2]:
+        setTabFilter('Return Requests')
+        break;
+      case tabs[3]:
         setTabFilter('')
         break;
     }

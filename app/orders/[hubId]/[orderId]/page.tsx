@@ -99,7 +99,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
         tracking_link: trackingLink,
         tracking_number: trackingNumber,
         shipping_carrier: shippingCarrier,
-        fulfillment_status: 'Unfulfilled',
+        fulfillment_status: 'Fulfilled',
         shipping_email_sent_at: 'true'
       }
     })
@@ -245,7 +245,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               <SectionHeader>Payment Info</SectionHeader>
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
                 <InfoTitle>Sub Total</InfoTitle>
-                <InfoValue>{formatPrice(order?.amount)}</InfoValue>
+                <InfoValue>{formatPrice((order?.amount ?? 0) / 100)}</InfoValue>
               </Stack>
 
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%' pt={2}>
@@ -255,14 +255,14 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
 
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%' pt={2}>
                 <InfoTitle>Shipping</InfoTitle>
-                <InfoValue>{formatPrice(order?.shipping_cost)}</InfoValue>
+                <InfoValue>{formatPrice((order?.shipping_cost ?? 0) / 100)}</InfoValue>
               </Stack>
 
               <Divider style={{ margin: '1rem 0' }} />
 
               <Stack justifyContent='space-between' alignItems='center' flexDirection='row' width='100%'>
                 <InfoTitle>Total</InfoTitle>
-                <span style={{ fontSize: '1.25rem' }}>{formatPrice((order?.amount ?? 0) + (order?.shipping_cost ?? 0))}</span>
+                <span style={{ fontSize: '1.25rem' }}>{formatPrice(((order?.amount ?? 0) / 100) + ((order?.shipping_cost ?? 0) / 100))}</span>
               </Stack>
             </Box>
 
