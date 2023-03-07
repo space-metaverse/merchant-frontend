@@ -92,6 +92,7 @@ interface SpaceOrder {
   crypto_payment_from: string
   crypto_payment_to: string
   currency: string
+  delivery_type: string
   customer: {
     account_id: number
     address: string
