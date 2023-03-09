@@ -286,7 +286,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
             <Stack gap={3}>
               <Info>
                 <InfoTitle>Fulfillment Status</InfoTitle>
-                <Chip label={getStatusLabel(order?.fulfillment_status) || ''} color={getStatusColor(order?.fulfillment_status)} style={{ marginTop: '0.5rem' }} />
+                <Chip label={getStatusLabel(order?.fulfillment_status) || 'Unfulfilled'} color={getStatusColor(order?.fulfillment_status)} style={{ marginTop: '0.5rem' }} />
               </Info>
               <Info>
                 <InfoTitle>Tracking Number</InfoTitle>
