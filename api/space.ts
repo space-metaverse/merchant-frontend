@@ -181,6 +181,18 @@ interface PatchFulfilOrderResponse {
   ok?: string
 }
 
+interface PostOrderNotesRequest {
+  data: {
+    order_sid: string
+    notes: string
+  }
+}
+
+interface PostOrderNotesResponse {
+  message?: string
+  ok?: string
+}
+
 const getBaseURL = (): string => {
   switch (process.env.NEXT_PUBLIC_ENV) {
     case 'local':
@@ -279,6 +291,16 @@ export const spaceApi = createApi({
         }
       })
     }),
+    postOrderNotes: builder.mutation<PostOrderNotesResponse, PostOrderNotesRequest>({
+      query: (body) => ({
+        url: '/api/v1/dynamical_pandora_box',
+        method: 'POST',
+        body,
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
   })
 })
 
@@ -290,5 +312,6 @@ export const {
   usePatchShippingZoneMutation,
   useDeleteShippingZoneMutation,
   useGetSpaceOrdersQuery,
-  usePatchFullfilOrderMutation
+  usePatchFullfilOrderMutation,
+  usePostOrderNotesMutation
 } = spaceApi

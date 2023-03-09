@@ -2,7 +2,7 @@
 import Title from "../../../../components/Title"
 import { Button, Checkbox, Chip, Modal, ModalProps, Textarea, TextInput } from "@space-metaverse-ag/space-ui"
 import { useRouter } from "next/navigation";
-import { useGetSpaceOrdersQuery, usePatchFullfilOrderMutation } from "../../../../api/space";
+import { useGetSpaceOrdersQuery, usePatchFullfilOrderMutation, usePostOrderNotesMutation } from "../../../../api/space";
 import { ArrowBackUp, ArrowLeft, ArrowRight } from "@space-metaverse-ag/space-ui/icons";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Box, Stack } from "@mui/material";
@@ -74,8 +74,6 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
 
   const {
     data: getSpaceOrdersData,
-    error: getSpaceOrdersError,
-    isLoading: isGetSpaceOrdersLoading,
     isSuccess: isGetSpaceOrdersSuccess,
     refetch: refetchGetSpaceOrdersQuery,
   } = useGetSpaceOrdersQuery({ hubId: String(hubId) }, { skip: !hubId })
@@ -83,12 +81,15 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
   const [
     patchFullfilOrder,
     {
-      data: patchFullfilOrderData,
-      error: patchFullfilOrderError,
       isLoading: isPatchFullfilOrderLoading,
       isSuccess: isPatchFullfilOrderSuccess,
     },
   ] = usePatchFullfilOrderMutation();
+
+  const [
+    postOrderNotes,
+    { },
+  ] = usePostOrderNotesMutation();
 
   const order = getSpaceOrdersData?.orders.find(order => order.order_sid === orderId)
 
@@ -111,6 +112,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
       setTrackingLink(order?.tracking_link || '')
       setShippingCarrier(order?.shipping_carrier || '')
       setSendNotificationEmail(order?.shipping_email_sent_at ? true : false)
+      setNotes(order?.notes || '')
     }
   }, [isGetSpaceOrdersSuccess, order])
 
@@ -137,6 +139,15 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
     if (nextOrder) {
       router.push(`/orders/${hubId}/${nextOrder?.order_sid}`)
     }
+  }
+
+  const handleSaveNotes = () => {
+    postOrderNotes({
+      data: {
+        order_sid: orderId,
+        notes
+      }
+    })
   }
 
   return (
@@ -273,11 +284,18 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
             <Box>
               <SectionHeader>Notes</SectionHeader>
               <Textarea
-                value={order?.notes}
+                value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder='Add your notes and wishes about this order'
               />
-              <Button label='Post' size='small' color="blue" outline style={{ marginTop: '1rem', float: 'right' }} />
+              <Button
+                label='Post'
+                size='small'
+                color="blue"
+                outline
+                style={{ marginTop: '1rem', float: 'right' }}
+                onClick={handleSaveNotes}
+              />
             </Box>
 
           </Grid>
