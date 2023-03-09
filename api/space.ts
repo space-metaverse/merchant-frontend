@@ -142,7 +142,6 @@ interface SpaceOrder {
       thumbnail_url: string
       weight: string
       weight_unit: string
-      size: string
     }
     quantity: number
   }>

@@ -27,15 +27,29 @@ interface OrderProductProps {
   title: string
   price: number
   quantity: number
+  weight: string
   image: string
   color: string
   size: string
+  dimension: string
   sku: string
   type: string
   isDark?: boolean
 }
 
-export default function OrderProduct({ title, price, quantity, image, color, size, sku, type, isDark }: OrderProductProps) {
+export default function OrderProduct({
+  title,
+  price,
+  quantity,
+  weight,
+  image,
+  color,
+  size,
+  dimension,
+  sku,
+  type,
+  isDark
+}: OrderProductProps) {
   return (
     <Stack flexDirection='row' gap={3} sx={{
       background: isDark ? '#FBFBFD' : '#FFFFFF',
@@ -51,17 +65,25 @@ export default function OrderProduct({ title, price, quantity, image, color, siz
 
         <h4>{title}</h4>
 
-        <Stack flexDirection='row' gap={2}>
+        <Stack flexDirection='row' gap={2} flexWrap='wrap'>
           <Variation>
-            <VariationTitle>Color</VariationTitle> {color || '?'} <VariationBreak>|</VariationBreak>
+            <VariationTitle>Color</VariationTitle> {color || '-'} <VariationBreak>|</VariationBreak>
           </Variation>
 
           <Variation>
-            <VariationTitle>Size</VariationTitle> {size || '?'} <VariationBreak>|</VariationBreak>
+            <VariationTitle>Size</VariationTitle> {size || '-'} <VariationBreak>|</VariationBreak>
           </Variation>
 
           <Variation>
-            <VariationTitle>Quantity</VariationTitle> {quantity}
+            <VariationTitle>Quantity</VariationTitle> {quantity || '-'} <VariationBreak>|</VariationBreak>
+          </Variation>
+
+          <Variation>
+            <VariationTitle>Weight</VariationTitle> {weight || '-'} <VariationBreak>|</VariationBreak>
+          </Variation>
+
+          <Variation>
+            <VariationTitle>Dimension</VariationTitle> {dimension || '-'}
           </Variation>
         </Stack>
 
