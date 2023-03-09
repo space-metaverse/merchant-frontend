@@ -227,10 +227,12 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
                     key={item.product.name + index}
                     quantity={item.quantity}
                     title={item.product.name}
-                    price={0}
+                    price={Number(item.product_variation?.price)}
+                    weight={item.product_variation?.weight + item.product_variation?.weight_unit}
                     image={item.product_variation?.thumbnail_url}
                     color={item.product_variation?.color}
-                    size={item.product_variation?.size}
+                    size={item.product_variation?.model_size}
+                    dimension={item.product_variation?.dimension}
                     sku={item.product_variation?.sku}
                     type={order?.crypto_amount ? 'Phygital' : 'Digital'}
                     isDark={index % 2 === 0}
