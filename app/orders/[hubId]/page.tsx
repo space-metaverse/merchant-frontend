@@ -24,7 +24,7 @@ export default function Orders() {
 
   const filteredRows = rows.filter(row => {
     if (tabFilter === 'Unfulfilled') {
-      return row.fulfillment_status && row.fulfillment_status !== 'Fulfilled'
+      return row.fulfillment_status && row.fulfillment_status !== 'Fulfilled' && row.status === 'payment_succeeded'
     } else if (tabFilter === 'Fulfilled') {
       return row.fulfillment_status && row.fulfillment_status === 'Fulfilled'
     } else if (tabFilter === 'Return Requests') {
@@ -52,7 +52,7 @@ export default function Orders() {
   }
 
   const tabs = useMemo(() => ([
-    `Unfulfilled (${rows?.filter((order) => order.fulfillment_status && order.fulfillment_status !== 'Fulfilled').length || 0})`,
+    `Unfulfilled (${rows?.filter((order) => order.fulfillment_status && order.fulfillment_status !== 'Fulfilled' && order.status === 'payment_succeeded').length || 0})`,
     `Fulfilled (${rows?.filter((order) => order.fulfillment_status === 'Fulfilled').length || 0})`,
     `Return Requests (${0})`,
     `All Orders (${rows?.length || 0})`,
