@@ -168,10 +168,11 @@ const ShippingRate = ({
 }: ShippingRateProps) => {
   const [shippingType, setShippingType] = useState(shippingOptions.includes(`${name} (${time})`) ? `${type} (${time})` : 'Custom Flat Rate (no transit time)')
   const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
-  const [newOrderMax, setNewOrderMax] = useState(orderMax ?? 0)
+  const [newOrderMax, setNewOrderMax] = useState(orderMax >= 0 ? orderMax : 0)
   const [rateName, setRateName] = useState(name ?? "")
   const [shippingPrice, setShippingPrice] = useState(price ?? 0)
   const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
+  const [noLimitChecked, setNoLimitChecked] = useState(orderMax === -1)
 
   const [
     patchShippingZone,
@@ -213,7 +214,7 @@ const ShippingRate = ({
         shipping_price: shippingPrice,
         price_conditions: priceConditionsChecked,
         order_min_value: newOrderMin,
-        order_max_value: newOrderMax
+        order_max_value: noLimitChecked ? -1 : newOrderMax
       }
     }
     if (id === 'new') {
@@ -222,6 +223,8 @@ const ShippingRate = ({
       patchShippingZone(data)
     }
   }
+
+  console.log(orderMax)
 
   const handleDeleteShippingZone = () => {
     setModalData({ country, name: shippingType.split('(')[0].slice(0, -1), shippingZoneId: id, type: 'rate' })
@@ -256,7 +259,7 @@ const ShippingRate = ({
                   <TextInput
                     style={{ width: '16rem' }}
                     value={shippingPrice}
-                    label='Shipping Price'
+                    label='Shipping Price ($)'
                     type='number'
                     onChange={(e) => setShippingPrice(Number(e.target.value))}
                   />
@@ -271,19 +274,29 @@ const ShippingRate = ({
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
                     <TextInput
                       style={{ width: '8rem' }}
-                      value={priceConditionsChecked ? newOrderMin : 'No Limit'}
-                      label='Order Min'
+                      value={priceConditionsChecked ? newOrderMin.toPrecision(3) : ''}
+                      label='Order Min ($)'
                       type='number'
                       disabled={!priceConditionsChecked}
                       onChange={(e) => setNewOrderMin(Number(e.target.value))}
+                      min={0}
+                      max={noLimitChecked ? undefined : newOrderMax}
+                      step={0.5}
                     />
                     <TextInput
                       style={{ width: '8rem' }}
-                      value={priceConditionsChecked ? newOrderMax : 'No Limit'}
-                      label='Order Max'
-                      type='number'
-                      disabled={!priceConditionsChecked}
-                      onChange={(e) => setNewOrderMax(Number(e.target.value))}
+                      value={priceConditionsChecked ? (noLimitChecked ? 'No Limit' : newOrderMax.toPrecision(3)) : ''}
+                      label='Order Max ($)'
+                      type={noLimitChecked ? 'text' : 'number'}
+                      disabled={!priceConditionsChecked || noLimitChecked}
+                      onChange={(e: any) => setNewOrderMax(Number(e.target.value))}
+                      min={newOrderMin}
+                      step={0.5}
+                    />
+                    <Checkbox
+                      label='No Limit'
+                      isChecked={noLimitChecked}
+                      onChange={() => setNoLimitChecked(!noLimitChecked)}
                     />
                   </div>
                 </div>
@@ -301,7 +314,7 @@ const ShippingRate = ({
               <div>
                 {
                   isPriceConditions && (
-                    <RatePrice>${orderMin} - ${orderMax}</RatePrice>
+                    <RatePrice>${orderMin} - {orderMax === -1 ? 'No limit' : `$${orderMax}`}</RatePrice>
                   )
                 }
                 <Chip label={shippingPrice ? `$${shippingPrice}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
