@@ -313,9 +313,13 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
               <Info>
                 <InfoTitle>Tracking Link</InfoTitle>
                 <InfoValue>
-                  <Link href={order?.tracking_link || "-"} target='_blank'>
-                    {order?.tracking_link || "-"}
-                  </Link>
+                  {
+                    order?.tracking_link ? (
+                      <Link href={order?.tracking_link} target='_blank'>
+                        {order?.tracking_link}
+                      </Link>
+                    ) : '-'
+                  }
                 </InfoValue>
               </Info>
               <Info>
