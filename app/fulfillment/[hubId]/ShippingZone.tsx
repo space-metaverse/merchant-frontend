@@ -262,6 +262,8 @@ const ShippingRate = ({
                     label='Shipping Price ($)'
                     type='number'
                     onChange={(e) => setShippingPrice(Number(e.target.value))}
+                    min={0}
+                    step={0.01}
                   />
                   <Chip label={shippingPrice ? `$${shippingPrice}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
                 </div>
@@ -274,24 +276,24 @@ const ShippingRate = ({
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
                     <TextInput
                       style={{ width: '8rem' }}
-                      value={priceConditionsChecked ? newOrderMin.toPrecision(3) : ''}
+                      value={priceConditionsChecked ? newOrderMin : ''}
                       label='Order Min ($)'
                       type='number'
                       disabled={!priceConditionsChecked}
                       onChange={(e) => setNewOrderMin(Number(e.target.value))}
                       min={0}
                       max={noLimitChecked ? undefined : newOrderMax}
-                      step={0.5}
+                      step={0.01}
                     />
                     <TextInput
                       style={{ width: '8rem' }}
-                      value={priceConditionsChecked ? (noLimitChecked ? 'No Limit' : newOrderMax.toPrecision(3)) : ''}
+                      value={priceConditionsChecked ? (noLimitChecked ? 'No Limit' : newOrderMax) : ''}
                       label='Order Max ($)'
                       type={noLimitChecked ? 'text' : 'number'}
                       disabled={!priceConditionsChecked || noLimitChecked}
                       onChange={(e: any) => setNewOrderMax(Number(e.target.value))}
                       min={newOrderMin}
-                      step={0.5}
+                      step={0.01}
                     />
                     <Checkbox
                       label='No Limit'
@@ -317,7 +319,7 @@ const ShippingRate = ({
                     <RatePrice>${orderMin} - {orderMax === -1 ? 'No limit' : `$${orderMax}`}</RatePrice>
                   )
                 }
-                <Chip label={shippingPrice ? `$${shippingPrice}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
+                <Chip label={shippingPrice ? `$${shippingPrice.toFixed(2)}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
               </div>
             )
           }
