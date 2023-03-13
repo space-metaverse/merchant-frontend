@@ -101,7 +101,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
         tracking_number: trackingNumber,
         shipping_carrier: shippingCarrier,
         fulfillment_status: 'Fulfilled',
-        shipping_email_sent_at: 'true'
+        shipping_email_sent_at: String(sendNotificationEmail)
       }
     })
   }
