@@ -231,7 +231,7 @@ const ShippingRate = ({
     openModal()
   }
 
-  const isValid = !isPatchShippingZoneLoading && (priceConditionsChecked ? (Number(newOrderMax) > Number(newOrderMin) || Number(newOrderMin) < Number(newOrderMax)) : true)
+  const isValid = !isPatchShippingZoneLoading && (priceConditionsChecked && !noLimitChecked ? (Number(newOrderMax) > Number(newOrderMin) || Number(newOrderMin) < Number(newOrderMax)) : true)
 
   return (
     <RateWrapper>
@@ -285,7 +285,7 @@ const ShippingRate = ({
                       onChange={(e) => setNewOrderMin(e.target.value ? Number(e.target.value) : '')}
                       min={0}
                       max={noLimitChecked ? undefined : newOrderMax}
-                      isError={Number(newOrderMin) > Number(newOrderMax) ? 'Min higher then max' : ''}
+                      isError={!noLimitChecked && (Number(newOrderMin) > Number(newOrderMax)) ? 'Min higher then max' : ''}
                       step={0.01}
                     />
                     <TextInput
@@ -296,7 +296,7 @@ const ShippingRate = ({
                       disabled={!priceConditionsChecked || noLimitChecked}
                       onChange={(e: any) => setNewOrderMax(e.target.value ? Number(e.target.value) : '')}
                       min={newOrderMin}
-                      isError={Number(newOrderMax) < Number(newOrderMin) ? 'Max less then min' : ''}
+                      isError={!noLimitChecked && (Number(newOrderMax) < Number(newOrderMin)) ? 'Max less then min' : ''}
                       step={0.01}
                     />
                     <Checkbox
