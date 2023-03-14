@@ -119,6 +119,7 @@ interface SpaceOrder {
       tax_rate: string
       tax_status: boolean
     }
+    product_type: string
     product_variation: {
       barcode: string
       color: string

@@ -245,7 +245,7 @@ export default function OrderPage({ params }: { params: { hubId: string, orderId
                     size={item.product_variation?.model_size}
                     dimension={item.product_variation?.dimension}
                     sku={item.product_variation?.sku}
-                    type={order?.crypto_amount ? 'Phygital' : 'Digital'}
+                    type={item?.product_type}
                     isDark={index % 2 === 0}
                   />
                 ))}
