@@ -231,7 +231,7 @@ const ShippingRate = ({
     openModal()
   }
 
-  const isValid = isPatchShippingZoneLoading || (Number(newOrderMax) < Number(newOrderMin) || Number(newOrderMin) > Number(newOrderMax))
+  const isValid = !isPatchShippingZoneLoading && (priceConditionsChecked ? (Number(newOrderMax) > Number(newOrderMin) || Number(newOrderMin) < Number(newOrderMax)) : true)
 
   return (
     <RateWrapper>
@@ -353,7 +353,7 @@ const ShippingRate = ({
               size={"medium"}
               color={"blue"}
               outline
-              disabled={isValid}
+              disabled={!isValid}
               onClick={handleSaveShippingZone}
             />
           </EditActions>
