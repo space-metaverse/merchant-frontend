@@ -231,6 +231,8 @@ const ShippingRate = ({
     openModal()
   }
 
+  const isValid = isPatchShippingZoneLoading || (Number(newOrderMax) < Number(newOrderMin) || Number(newOrderMin) > Number(newOrderMax))
+
   return (
     <RateWrapper>
       <RateHeader>
@@ -275,7 +277,7 @@ const ShippingRate = ({
                   />
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
                     <TextInput
-                      style={{ width: '8rem' }}
+                      style={{ width: '14rem' }}
                       value={priceConditionsChecked ? newOrderMin : ''}
                       label='Order Min ($)'
                       type='number'
@@ -283,16 +285,18 @@ const ShippingRate = ({
                       onChange={(e) => setNewOrderMin(e.target.value ? Number(e.target.value) : '')}
                       min={0}
                       max={noLimitChecked ? undefined : newOrderMax}
+                      isError={Number(newOrderMin) > Number(newOrderMax) ? 'Min higher then max' : ''}
                       step={0.01}
                     />
                     <TextInput
-                      style={{ width: '8rem' }}
+                      style={{ width: '14rem' }}
                       value={priceConditionsChecked ? (noLimitChecked ? 'No Limit' : newOrderMax) : ''}
                       label='Order Max ($)'
                       type={noLimitChecked ? 'text' : 'number'}
                       disabled={!priceConditionsChecked || noLimitChecked}
                       onChange={(e: any) => setNewOrderMax(e.target.value ? Number(e.target.value) : '')}
                       min={newOrderMin}
+                      isError={Number(newOrderMax) < Number(newOrderMin) ? 'Max less then min' : ''}
                       step={0.01}
                     />
                     <Checkbox
@@ -349,7 +353,7 @@ const ShippingRate = ({
               size={"medium"}
               color={"blue"}
               outline
-              disabled={isPatchShippingZoneLoading}
+              disabled={isValid}
               onClick={handleSaveShippingZone}
             />
           </EditActions>
