@@ -167,10 +167,10 @@ const ShippingRate = ({
   openModal,
 }: ShippingRateProps) => {
   const [shippingType, setShippingType] = useState(shippingOptions.includes(`${name} (${time})`) ? `${type} (${time})` : 'Custom Flat Rate (no transit time)')
-  const [newOrderMin, setNewOrderMin] = useState(orderMin ?? 0)
-  const [newOrderMax, setNewOrderMax] = useState(orderMax >= 0 ? orderMax : 0)
+  const [newOrderMin, setNewOrderMin] = useState<number | string>(orderMin ?? '')
+  const [newOrderMax, setNewOrderMax] = useState<number | string>(orderMax >= 0 ? orderMax : '')
   const [rateName, setRateName] = useState(name ?? "")
-  const [shippingPrice, setShippingPrice] = useState(price ?? 0)
+  const [shippingPrice, setShippingPrice] = useState<number | string>(price ?? '')
   const [priceConditionsChecked, setPriceConditionsChecked] = useState(isPriceConditions)
   const [noLimitChecked, setNoLimitChecked] = useState(orderMax === -1)
 
@@ -261,7 +261,7 @@ const ShippingRate = ({
                     value={shippingPrice}
                     label='Shipping Price ($)'
                     type='number'
-                    onChange={(e) => setShippingPrice(Number(e.target.value))}
+                    onChange={(e) => setShippingPrice(e.target.value ? Number(e.target.value) : '')}
                     min={0}
                     step={0.01}
                   />
@@ -280,7 +280,7 @@ const ShippingRate = ({
                       label='Order Min ($)'
                       type='number'
                       disabled={!priceConditionsChecked}
-                      onChange={(e) => setNewOrderMin(Number(e.target.value))}
+                      onChange={(e) => setNewOrderMin(e.target.value ? Number(e.target.value) : '')}
                       min={0}
                       max={noLimitChecked ? undefined : newOrderMax}
                       step={0.01}
@@ -291,7 +291,7 @@ const ShippingRate = ({
                       label='Order Max ($)'
                       type={noLimitChecked ? 'text' : 'number'}
                       disabled={!priceConditionsChecked || noLimitChecked}
-                      onChange={(e: any) => setNewOrderMax(Number(e.target.value))}
+                      onChange={(e: any) => setNewOrderMax(e.target.value ? Number(e.target.value) : '')}
                       min={newOrderMin}
                       step={0.01}
                     />
