@@ -211,10 +211,10 @@ const ShippingRate = ({
         name: shippingType.split('(')[0].slice(0, -1) === 'Custom Flat Rate' ? rateName || 'Custom Flat Rate' : shippingType.split('(')[0].slice(0, -1),
         rate_name: shippingType.split('(')[0].slice(0, -1) === 'Custom Flat Rate' ? rateName || 'Custom Flat Rate' : shippingType.split('(')[0].slice(0, -1),
         rate_transit_time: shippingType.split('(')[1].slice(0, -1),
-        shipping_price: shippingPrice,
+        shipping_price: Number(shippingPrice),
         price_conditions: priceConditionsChecked,
-        order_min_value: newOrderMin,
-        order_max_value: noLimitChecked ? -1 : newOrderMax
+        order_min_value: Number(newOrderMin),
+        order_max_value: noLimitChecked ? -1 : Number(newOrderMax)
       }
     }
     if (id === 'new') {
@@ -319,7 +319,7 @@ const ShippingRate = ({
                     <RatePrice>${orderMin} - {orderMax === -1 ? 'No limit' : `$${orderMax}`}</RatePrice>
                   )
                 }
-                <Chip label={shippingPrice ? `$${shippingPrice.toFixed(2)}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
+                <Chip label={shippingPrice ? `$${Number(shippingPrice).toFixed(2)}` : 'Free'} color={shippingPrice ? 'blue' : 'green'} />
               </div>
             )
           }
