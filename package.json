@@ -15,7 +15,7 @@
     "@next/font": "13.2.3",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/nextjs": "^7.43.0",
-    "@space-metaverse-ag/space-ui": "^1.6.0",
+    "@space-metaverse-ag/space-ui": "^1.6.2",
     "cookies-next": "^2.1.1",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.3",

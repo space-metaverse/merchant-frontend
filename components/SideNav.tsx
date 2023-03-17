@@ -43,9 +43,9 @@ const SideNav = () => {
       {
         Icon: Orders,
         route: '/orders',
-        label: <>Orders <Chip label={`${getOrdersCountData?.unfulfilled_order_count} Unfulfilled`} color='orange' style={{ marginLeft: '1rem' }} /> </>,
+        label: <>Orders <Chip label={`${getOrdersCountData?.unfulfilled_order_count ?? '0'} Unfulfilled`} color='orange' style={{ marginLeft: '1rem' }} /> </>,
         disabled: false,
-        key: 'orders'
+        index: 'orders'
       },
       {
         Icon: Cart,
