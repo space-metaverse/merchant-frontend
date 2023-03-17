@@ -224,8 +224,6 @@ const ShippingRate = ({
     }
   }
 
-  console.log(orderMax)
-
   const handleDeleteShippingZone = () => {
     setModalData({ country, name: shippingType.split('(')[0].slice(0, -1), shippingZoneId: id, type: 'rate' })
     openModal()
