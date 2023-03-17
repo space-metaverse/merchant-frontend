@@ -1,5 +1,5 @@
-import { useGetSpaceQuery } from '../api/space';
-import { SideNav as SideNavComponent, SideNavProps } from '@space-metaverse-ag/space-ui'
+import { useGetOrdersCountQuery, useGetSpaceQuery } from '../api/space';
+import { Chip, SideNav as SideNavComponent, SideNavProps } from '@space-metaverse-ag/space-ui'
 import { Orders, Cart, Space } from '@space-metaverse-ag/space-ui/icons'
 import { usePathname, useRouter } from 'next/navigation';
 import styled from 'styled-components';
@@ -26,19 +26,26 @@ const SideNav = () => {
     isLoading: isGetSpaceLoading
   } = useGetSpaceQuery({ hubId: String(hubId) }, { skip: !hubId })
 
+  const {
+    data: getOrdersCountData,
+    error: getOrdersCountError,
+    isLoading: isGetOrdersCountLoading
+  } = useGetOrdersCountQuery({ hubId: String(hubId) }, { skip: !hubId })
+
   const options: SideNavProps["routes"] = [
     {
       Icon: Space,
-      route: '/spaces',
-      label: `${hubId ? "Space Info" : "Spaces"}`,
+      route: hubId ? `/spaces/${hubId}` : "/spaces",
+      label: hubId ? "Space Info" : "Spaces",
       disabled: false,
     },
     ...(hubId ? [
       {
         Icon: Orders,
         route: '/orders',
-        label: "Orders",
+        label: <>Orders <Chip label={`${getOrdersCountData?.unfulfilled_order_count ?? '0'} Unfulfilled`} color='orange' style={{ marginLeft: '1rem' }} /> </>,
         disabled: false,
+        index: 'orders'
       },
       {
         Icon: Cart,
