@@ -302,6 +302,15 @@ export const spaceApi = createApi({
         }
       })
     }),
+    getOrdersCount: builder.query<{ unfulfilled_order_count: number }, { hubId: string }>({
+      query: ({ hubId }) => ({
+        url: `/api/v1/count_orders_unfulfilled/?hub_id=${hubId}`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${cookies.hubsToken}`
+        }
+      })
+    }),
   })
 })
 
@@ -314,5 +323,6 @@ export const {
   useDeleteShippingZoneMutation,
   useGetSpaceOrdersQuery,
   usePatchFullfilOrderMutation,
-  usePostOrderNotesMutation
+  usePostOrderNotesMutation,
+  useGetOrdersCountQuery
 } = spaceApi

@@ -1,4 +1,4 @@
-import { useGetSpaceQuery } from '../api/space';
+import { useGetOrdersCountQuery, useGetSpaceQuery } from '../api/space';
 import { SideNav as SideNavComponent, SideNavProps } from '@space-metaverse-ag/space-ui'
 import { Orders, Cart, Space } from '@space-metaverse-ag/space-ui/icons'
 import { usePathname, useRouter } from 'next/navigation';
@@ -25,6 +25,12 @@ const SideNav = () => {
     error: getSpaceError,
     isLoading: isGetSpaceLoading
   } = useGetSpaceQuery({ hubId: String(hubId) }, { skip: !hubId })
+
+  const {
+    data: getOrdersCountData,
+    error: getOrdersCountError,
+    isLoading: isGetOrdersCountLoading
+  } = useGetOrdersCountQuery({ hubId: String(hubId) }, { skip: !hubId })
 
   const options: SideNavProps["routes"] = [
     {

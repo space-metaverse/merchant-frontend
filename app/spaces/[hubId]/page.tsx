@@ -1,14 +1,7 @@
 "use client"
-import { Card } from "@space-metaverse-ag/space-ui"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import styled from "styled-components"
 import { useGetSpaceQuery } from "../../../api/space"
 import Title from "../../../components/Title"
-
-const Grid = styled.div`
-
-`
 
 export default function Spaces() {
   const pathname = usePathname();
